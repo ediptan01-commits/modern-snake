@@ -269,117 +269,174 @@ function createSnakeMenu() {
                 "pointer";
 
             button.style.background =
-                selected
-                    ? "#00d9ff"
-                    : "#243044";
 
-            button.style.color =
-                selected
-                    ? "#061018"
-                    : "#ffffff";
+function createSnakeMenu() {
 
+    const old = document.getElementById("snakeMenu");
 
-            button.onclick =
-                function () {
+    if (old) {
+        old.remove();
+        return;
+    }
 
-                    // Zaten sahip
-                    if (
-                        ownedSnakes.includes(id)
-                    ) {
+    const menu = document.createElement("div");
 
-                        selectedSnake = id;
+    menu.id = "snakeMenu";
 
-                        saveSnakeData();
+    menu.style.cssText = `
+        position:fixed;
+        inset:0;
+        width:100vw;
+        height:100vh;
+        background:rgba(3,8,18,.95);
+        backdrop-filter:blur(8px);
+        z-index:999999;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        padding:20px;
+        box-sizing:border-box;
+        overflow:hidden;
+    `;
 
-                        createSnakeMenu();
+    const panel = document.createElement("div");
 
-                        return;
-                    }
+    panel.style.cssText = `
+        width:100%;
+        max-width:380px;
+        max-height:88vh;
+        overflow-y:auto;
+        box-sizing:border-box;
+        padding:20px;
+        border-radius:24px;
+        background:linear-gradient(#18263d,#0d1524);
+        border:1px solid #00dfff;
+        box-shadow:0 0 35px #00dfff44;
+    `;
 
+    panel.innerHTML = `
+        <h2 style="
+            color:white;
+            text-align:center;
+            margin:0 0 8px;
+            font-size:28px;
+        ">🐍 YILANLAR</h2>
 
-                    // Satın alma
-                    if (
-                        coins >=
-                        snakeData.price
-                    ) {
+        <div style="
+            color:#ffd54a;
+            text-align:center;
+            font-weight:bold;
+            margin-bottom:18px;
+        ">🪙 ${coins} COIN</div>
+    `;
 
-                        coins -=
-                            snakeData.price;
+    Object.keys(snakes).forEach(id => {
 
-                        ownedSnakes.push(id);
+        const s = snakes[id];
 
-                        selectedSnake = id;
+        const owned = ownedSnakes.includes(id);
+        const selected = selectedSnake === id;
 
-                        saveSnakeData();
+        const button =
+            document.createElement("button");
 
-                        drawCoinCounter();
+        button.style.cssText = `
+            width:100%;
+            padding:15px;
+            margin:6px 0;
+            border:0;
+            border-radius:14px;
+            font-size:17px;
+            font-weight:bold;
+            text-align:left;
+            background:${selected ? "#00dfff" : "#24344d"};
+            color:${selected ? "#06202a" : "white"};
+        `;
 
-                        createSnakeMenu();
+        if (selected) {
 
-                    } else {
+            button.textContent =
+                "🐍 " + s.name + "  ✓ SEÇİLİ";
 
-                        alert(
-                            "Bu yılanı almak için " +
-                            snakeData.price +
-                            " coin gerekiyor."
-                        );
-                    }
-                };
+        } else if (owned) {
 
+            button.textContent =
+                "🐍 " + s.name + "  → SEÇ";
 
-            menu.appendChild(button);
+        } else {
+
+            button.textContent =
+                "🔒 " + s.name +
+                "   🪙 " + s.price;
         }
-    );
 
+        button.onclick = () => {
+
+            if (owned) {
+
+                selectedSnake = id;
+
+                saveData();
+
+                menu.remove();
+
+                return;
+            }
+
+            if (coins >= s.price) {
+
+                coins -= s.price;
+
+                ownedSnakes.push(id);
+
+                selectedSnake = id;
+
+                saveData();
+
+                drawCoinCounter();
+
+                menu.remove();
+
+            } else {
+
+                alert(
+                    "Yeterli coin yok!\n\n" +
+                    s.name +
+                    " için " +
+                    s.price +
+                    " coin gerekiyor."
+                );
+            }
+        };
+
+        panel.appendChild(button);
+    });
 
     const close =
         document.createElement("button");
 
-    close.textContent =
-        "KAPAT";
+    close.textContent = "KAPAT";
 
-    close.style.display =
-        "block";
+    close.style.cssText = `
+        width:100%;
+        padding:14px;
+        margin-top:10px;
+        border:0;
+        border-radius:14px;
+        background:#ff3158;
+        color:white;
+        font-size:17px;
+        font-weight:bold;
+    `;
 
-    close.style.width =
-        "100%";
+    close.onclick = () => menu.remove();
 
-    close.style.marginTop =
-        "12px";
+    panel.appendChild(close);
 
-    close.style.padding =
-        "12px";
+    menu.appendChild(panel);
 
-    close.style.border =
-        "none";
-
-    close.style.borderRadius =
-        "12px";
-
-    close.style.background =
-        "#ff3158";
-
-    close.style.color =
-        "#ffffff";
-
-    close.style.fontWeight =
-        "bold";
-
-    close.onclick =
-        function () {
-
-            menu.remove();
-        };
-
-
-    menu.appendChild(close);
-
-    document.body.insertBefore(
-        menu,
-        game.parentElement
-    );
+    document.body.appendChild(menu);
 }
-
 
 // =====================================
 // YILANLAR BUTONU
