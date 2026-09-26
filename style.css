@@ -6,38 +6,74 @@
 
 body {
     min-height: 100vh;
-    background: #080b14;
+    background:
+        radial-gradient(circle at top, #14213d, #05070d 70%);
     color: white;
     font-family: Arial, sans-serif;
+
     display: flex;
     justify-content: center;
     align-items: center;
+
+    overflow: hidden;
 }
 
 .game-container {
     width: 100%;
-    max-width: 500px;
+    max-width: 450px;
     text-align: center;
-    padding: 20px;
+    padding: 15px;
 }
 
 h1 {
-    font-size: 42px;
-    letter-spacing: 4px;
-    margin-bottom: 25px;
+    font-size: 34px;
+    letter-spacing: 5px;
+    margin-bottom: 8px;
+}
+
+#score {
+    font-size: 20px;
+    font-weight: bold;
+    color: #00e5ff;
+    margin-bottom: 15px;
+}
+
+#game {
+    display: flex;
+    justify-content: center;
+}
+
+canvas {
+    width: min(92vw, 400px);
+    height: min(92vw, 400px);
+
+    border: 2px solid #00e5ff;
+    border-radius: 18px;
+
+    box-shadow:
+        0 0 20px rgba(0, 229, 255, 0.25),
+        inset 0 0 30px rgba(0, 229, 255, 0.05);
 }
 
 button {
+    margin-top: 18px;
+
     border: none;
-    padding: 16px 45px;
     border-radius: 30px;
+
+    padding: 15px 45px;
+
     background: #00e5ff;
     color: #001014;
-    font-size: 20px;
+
+    font-size: 18px;
     font-weight: bold;
+
     cursor: pointer;
+
+    box-shadow: 0 0 20px rgba(0, 229, 255, 0.35);
 }
 
 button:active {
-    transform: scale(0.95);
+    transform: scale(0.94);
 }
