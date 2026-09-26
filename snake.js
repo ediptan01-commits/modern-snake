@@ -13,8 +13,14 @@ const ctx = canvas.getContext("2d");
 
 const grid = 20;
 
+
+// =====================================
+// OYUN DEĞİŞKENLERİ
+// =====================================
+
 let snake = [];
 let food = null;
+let coin = null;
 
 let direction = {
     x: grid,
@@ -30,9 +36,19 @@ let score = 0;
 let gameRunning = false;
 let gameLoop = null;
 
-// ==============================
-// DİL / YEM ANİMASYONU
-// ==============================
+
+// =====================================
+// COIN
+// =====================================
+
+let coins = Number(
+    localStorage.getItem("modernSnakeCoins") || 0
+);
+
+
+// =====================================
+// DİL ANİMASYONU
+// =====================================
 
 let tongueTimer = 0;
 let tonguePower = 0;
@@ -41,9 +57,54 @@ let eatingAnimation = 0;
 let eatenFood = null;
 
 
-// ==============================
+// =====================================
+// COIN GÖRÜNTÜSÜ
+// =====================================
+
+function drawCoinCounter() {
+
+    let counter = document.getElementById("coinCounter");
+
+    if (!counter) {
+
+        counter = document.createElement("div");
+
+        counter.id = "coinCounter";
+
+        counter.style.fontSize = "20px";
+        counter.style.fontWeight = "bold";
+        counter.style.color = "#ffd54a";
+        counter.style.marginBottom = "8px";
+
+        game.parentElement.insertBefore(
+            counter,
+            game
+        );
+    }
+
+    counter.textContent =
+        "🪙 " + coins;
+}
+
+
+// =====================================
+// COIN KAYDET
+// =====================================
+
+function saveCoins() {
+
+    localStorage.setItem(
+        "modernSnakeCoins",
+        coins
+    );
+
+    drawCoinCounter();
+}
+
+
+// =====================================
 // OYUNU BAŞLAT
-// ==============================
+// =====================================
 
 function startGame() {
 
@@ -73,25 +134,35 @@ function startGame() {
     eatingAnimation = 0;
     eatenFood = null;
 
-    scoreText.textContent = "Skor: 0";
+    scoreText.textContent =
+        "Skor: 0";
 
     createFood();
 
+    createCoin();
+
     gameRunning = true;
 
-    startButton.textContent = "YENİDEN BAŞLAT";
+    startButton.textContent =
+        "YENİDEN BAŞLAT";
 
     clearInterval(gameLoop);
 
-    gameLoop = setInterval(update, 120);
+    gameLoop =
+        setInterval(
+            update,
+            120
+        );
 
     draw();
+
+    drawCoinCounter();
 }
 
 
-// ==============================
+// =====================================
 // OYUN GÜNCELLE
-// ==============================
+// =====================================
 
 function update() {
 
@@ -107,9 +178,7 @@ function update() {
     };
 
 
-    // ==========================
     // DUVAR
-    // ==========================
 
     if (
         head.x < 0 ||
@@ -124,9 +193,7 @@ function update() {
     }
 
 
-    // ==========================
     // KENDİNE ÇARPMA
-    // ==========================
 
     if (
         snake.some(
@@ -145,9 +212,9 @@ function update() {
     snake.unshift(head);
 
 
-    // ==========================
-    // YEM YENDİ
-    // ==========================
+    // =================================
+    // YEM
+    // =================================
 
     if (
         food &&
@@ -162,32 +229,23 @@ function update() {
             "Skor: " + score;
 
 
-        // Yenen yemi sakla
         eatenFood = {
             x: food.x,
             y: food.y
         };
 
-
-        // Yem geçici olarak kaldır
         food = null;
 
-
-        // 👅 DİL ÇIKAR
         tonguePower = 1;
 
         tongueTimer = 8;
 
-
-        // 🍒 YEME ANİMASYONU
         eatingAnimation = 8;
 
     }
 
     else {
 
-        // Yem animasyonu sırasında
-        // yılan büyümeye devam etsin
         if (eatingAnimation === 0) {
 
             snake.pop();
@@ -195,9 +253,27 @@ function update() {
     }
 
 
-    // ==========================
-    // DİL ZAMANI
-    // ==========================
+    // =================================
+    // COIN TOPLAMA
+    // =================================
+
+    if (
+        coin &&
+        head.x === coin.x &&
+        head.y === coin.y
+    ) {
+
+        coins++;
+
+        saveCoins();
+
+        createCoin();
+    }
+
+
+    // =================================
+    // DİL
+    // =================================
 
     if (tongueTimer > 0) {
 
@@ -210,9 +286,9 @@ function update() {
     }
 
 
-    // ==========================
-    // YEME ANİMASYONU
-    // ==========================
+    // =================================
+    // YEM ANİMASYONU
+    // =================================
 
     if (eatingAnimation > 0) {
 
@@ -231,15 +307,14 @@ function update() {
 }
 
 
-// ==============================
+// =====================================
 // ANA ÇİZİM
-// ==============================
+// =====================================
 
 function draw() {
 
-    // Arka plan
-
-    ctx.fillStyle = "#101522";
+    ctx.fillStyle =
+        "#101522";
 
     ctx.fillRect(
         0,
@@ -249,9 +324,10 @@ function draw() {
     );
 
 
-    // Izgara
+    // IZGARA
 
-    ctx.strokeStyle = "#182131";
+    ctx.strokeStyle =
+        "#182131";
 
     ctx.lineWidth = 1;
 
@@ -264,7 +340,10 @@ function draw() {
 
         ctx.beginPath();
 
-        ctx.moveTo(x, 0);
+        ctx.moveTo(
+            x,
+            0
+        );
 
         ctx.lineTo(
             x,
@@ -283,7 +362,10 @@ function draw() {
 
         ctx.beginPath();
 
-        ctx.moveTo(0, y);
+        ctx.moveTo(
+            0,
+            y
+        );
 
         ctx.lineTo(
             canvas.width,
@@ -296,25 +378,28 @@ function draw() {
 
     drawFood();
 
+    drawCoin();
+
     drawSnake();
 }
 
 
-// ==============================
+// =====================================
 // YEM
-// ==============================
+// =====================================
 
 function drawFood() {
 
     let currentFood = food;
 
 
-    // Yenen yem animasyon sırasında
-    // eski yerinde görünmeye devam eder
+    if (
+        !currentFood &&
+        eatenFood
+    ) {
 
-    if (!currentFood && eatenFood) {
-
-        currentFood = eatenFood;
+        currentFood =
+            eatenFood;
     }
 
 
@@ -324,21 +409,26 @@ function drawFood() {
 
 
     const x =
-        currentFood.x + grid / 2;
+        currentFood.x +
+        grid / 2;
 
     const y =
-        currentFood.y + grid / 2;
+        currentFood.y +
+        grid / 2;
 
-
-    // Yeme animasyonunda küçülme
 
     let size = 9;
 
-    if (eatingAnimation > 0) {
+
+    if (
+        eatingAnimation > 0
+    ) {
 
         size =
             9 *
-            (eatingAnimation / 8);
+            (
+                eatingAnimation / 8
+            );
     }
 
 
@@ -369,7 +459,8 @@ function drawFood() {
     );
 
 
-    ctx.fillStyle = gradient;
+    ctx.fillStyle =
+        gradient;
 
 
     ctx.beginPath();
@@ -383,42 +474,119 @@ function drawFood() {
     );
 
     ctx.fill();
+}
 
 
-    // Parlama
+// =====================================
+// 🪙 COIN ÇİZ
+// =====================================
+
+function drawCoin() {
+
+    if (!coin) {
+        return;
+    }
+
+
+    const x =
+        coin.x +
+        grid / 2;
+
+    const y =
+        coin.y +
+        grid / 2;
+
+
+    // Glow
+
+    ctx.shadowColor =
+        "#ffd54a";
+
+    ctx.shadowBlur = 12;
+
+
+    const gradient =
+        ctx.createRadialGradient(
+            x - 3,
+            y - 3,
+            1,
+            x,
+            y,
+            10
+        );
+
+
+    gradient.addColorStop(
+        0,
+        "#fff6a0"
+    );
+
+    gradient.addColorStop(
+        0.45,
+        "#ffd54a"
+    );
+
+    gradient.addColorStop(
+        1,
+        "#c88700"
+    );
+
 
     ctx.fillStyle =
-        "rgba(255,255,255,0.55)";
+        gradient;
 
 
     ctx.beginPath();
 
     ctx.arc(
-        x - 3,
-        y - 3,
-        2,
+        x,
+        y,
+        8,
         0,
         Math.PI * 2
     );
 
     ctx.fill();
+
+
+    ctx.shadowBlur = 0;
+
+
+    // Coin üzerindeki S
+
+    ctx.fillStyle =
+        "#8a5c00";
+
+    ctx.font =
+        "bold 11px Arial";
+
+    ctx.textAlign =
+        "center";
+
+    ctx.textBaseline =
+        "middle";
+
+    ctx.fillText(
+        "$",
+        x,
+        y + 1
+    );
 }
 
 
-// ==============================
-// YILAN
-// ==============================
+// =====================================
+// 🐍 YILAN
+// =====================================
 
 function drawSnake() {
 
-    if (snake.length === 0) {
+    if (
+        snake.length === 0
+    ) {
+
         return;
     }
 
-
-    // ==========================
-    // GÖVDE
-    // ==========================
 
     const bodyGradient =
         ctx.createLinearGradient(
@@ -452,9 +620,11 @@ function drawSnake() {
 
     ctx.lineWidth = 17;
 
-    ctx.lineCap = "round";
+    ctx.lineCap =
+        "round";
 
-    ctx.lineJoin = "round";
+    ctx.lineJoin =
+        "round";
 
 
     drawSmoothSnakePath();
@@ -462,7 +632,7 @@ function drawSnake() {
     ctx.stroke();
 
 
-    // Gövde parlaklığı
+    // Parlaklık
 
     ctx.strokeStyle =
         "rgba(220,255,170,0.20)";
@@ -518,36 +688,54 @@ function drawSnake() {
 }
 
 
-// ==============================
-// YUMUŞAK YILAN GÖVDESİ
-// ==============================
+// =====================================
+// YUMUŞAK GÖVDE
+// =====================================
 
 function drawSmoothSnakePath() {
 
-    if (snake.length < 2) {
+    if (
+        snake.length < 2
+    ) {
+
         return;
     }
 
 
     const points =
-        snake.map(part => ({
-            x: part.x + grid / 2,
-            y: part.y + grid / 2
-        }));
+        snake.map(
+            part => ({
+                x:
+                    part.x +
+                    grid / 2,
+
+                y:
+                    part.y +
+                    grid / 2
+            })
+        );
 
 
     ctx.beginPath();
 
 
     ctx.moveTo(
-        points[points.length - 1].x,
-        points[points.length - 1].y
+        points[
+            points.length - 1
+        ].x,
+
+        points[
+            points.length - 1
+        ].y
     );
 
 
     for (
-        let i = points.length - 1;
+        let i =
+            points.length - 1;
+
         i > 0;
+
         i--
     ) {
 
@@ -559,10 +747,17 @@ function drawSmoothSnakePath() {
 
 
         const midX =
-            (current.x + next.x) / 2;
+            (
+                current.x +
+                next.x
+            ) / 2;
+
 
         const midY =
-            (current.y + next.y) / 2;
+            (
+                current.y +
+                next.y
+            ) / 2;
 
 
         ctx.quadraticCurveTo(
@@ -590,19 +785,24 @@ function drawSmoothSnakePath() {
 }
 
 
-// ==============================
+// =====================================
 // YILAN BAŞI
-// ==============================
+// =====================================
 
 function drawSnakeHead() {
 
-    const head = snake[0];
+    const head =
+        snake[0];
+
 
     const headX =
-        head.x + grid / 2;
+        head.x +
+        grid / 2;
+
 
     const headY =
-        head.y + grid / 2;
+        head.y +
+        grid / 2;
 
 
     ctx.save();
@@ -617,27 +817,45 @@ function drawSnakeHead() {
     let angle = 0;
 
 
-    if (direction.x > 0) {
+    if (
+        direction.x > 0
+    ) {
+
         angle = 0;
     }
 
-    if (direction.x < 0) {
-        angle = Math.PI;
+
+    if (
+        direction.x < 0
+    ) {
+
+        angle =
+            Math.PI;
     }
 
-    if (direction.y < 0) {
-        angle = -Math.PI / 2;
+
+    if (
+        direction.y < 0
+    ) {
+
+        angle =
+            -Math.PI / 2;
     }
 
-    if (direction.y > 0) {
-        angle = Math.PI / 2;
+
+    if (
+        direction.y > 0
+    ) {
+
+        angle =
+            Math.PI / 2;
     }
 
 
     ctx.rotate(angle);
 
 
-    // Baş gölgesi
+    // Gölge
 
     ctx.fillStyle =
         "rgba(0,0,0,0.35)";
@@ -706,9 +924,7 @@ function drawSnakeHead() {
     ctx.fill();
 
 
-    // ==========================
-    // GÖZLER
-    // ==========================
+    // Gözler
 
     ctx.fillStyle =
         "#f4df55";
@@ -737,7 +953,8 @@ function drawSnakeHead() {
 
     // Göz bebekleri
 
-    ctx.fillStyle = "#050505";
+    ctx.fillStyle =
+        "#050505";
 
 
     ctx.beginPath();
@@ -761,7 +978,7 @@ function drawSnakeHead() {
     ctx.fill();
 
 
-    // Burun delikleri
+    // Burun
 
     ctx.fillStyle =
         "#102510";
@@ -788,12 +1005,11 @@ function drawSnakeHead() {
     ctx.fill();
 
 
-    // ==========================
-    // DİL
-    // SADECE YEME ANINDA
-    // ==========================
+    // Dil
 
-    if (tonguePower > 0) {
+    if (
+        tonguePower > 0
+    ) {
 
         drawTongue();
     }
@@ -803,13 +1019,12 @@ function drawSnakeHead() {
 }
 
 
-// ==============================
+// =====================================
 // DİL
-// ==============================
+// =====================================
 
 function drawTongue() {
 
-    // Dil yeme sırasında çok belirgin
     const length = 32;
 
 
@@ -818,13 +1033,12 @@ function drawTongue() {
 
     ctx.lineWidth = 2;
 
-    ctx.lineCap = "round";
+    ctx.lineCap =
+        "round";
 
 
     ctx.beginPath();
 
-
-    // Ana dil
 
     ctx.moveTo(
         13,
@@ -838,12 +1052,11 @@ function drawTongue() {
     );
 
 
-    // Üst çatal
-
     ctx.moveTo(
         length,
         0
     );
+
 
     ctx.lineTo(
         length + 7,
@@ -851,12 +1064,11 @@ function drawTongue() {
     );
 
 
-    // Alt çatal
-
     ctx.moveTo(
         length,
         0
     );
+
 
     ctx.lineTo(
         length + 7,
@@ -868,34 +1080,40 @@ function drawTongue() {
 }
 
 
-// ==============================
-// YENİ YEM
-// ==============================
+// =====================================
+// YEM OLUŞTUR
+// =====================================
 
 function createFood() {
 
-    let validPosition = false;
+    let valid = false;
 
 
-    while (!validPosition) {
+    while (!valid) {
 
         food = {
 
             x:
                 Math.floor(
                     Math.random() *
-                    (canvas.width / grid)
+                    (
+                        canvas.width /
+                        grid
+                    )
                 ) * grid,
 
             y:
                 Math.floor(
                     Math.random() *
-                    (canvas.height / grid)
+                    (
+                        canvas.height /
+                        grid
+                    )
                 ) * grid
         };
 
 
-        validPosition =
+        valid =
             !snake.some(
                 part =>
                     part.x === food.x &&
@@ -905,9 +1123,62 @@ function createFood() {
 }
 
 
-// ==============================
+// =====================================
+// 🪙 COIN OLUŞTUR
+// =====================================
+
+function createCoin() {
+
+    let valid = false;
+
+
+    while (!valid) {
+
+        coin = {
+
+            x:
+                Math.floor(
+                    Math.random() *
+                    (
+                        canvas.width /
+                        grid
+                    )
+                ) * grid,
+
+            y:
+                Math.floor(
+                    Math.random() *
+                    (
+                        canvas.height /
+                        grid
+                    )
+                ) * grid
+        };
+
+
+        valid =
+            !snake.some(
+                part =>
+                    part.x === coin.x &&
+                    part.y === coin.y
+            );
+
+
+        if (
+            food &&
+            coin.x === food.x &&
+            coin.y === food.y
+        ) {
+
+            valid = false;
+        }
+    }
+}
+
+
+// =====================================
 // OYUN BİTTİ
-// ==============================
+// =====================================
 
 function endGame() {
 
@@ -919,20 +1190,25 @@ function endGame() {
         "TEKRAR OYNA";
 
 
-    setTimeout(() => {
+    setTimeout(
+        () => {
 
-        alert(
-            "Oyun bitti! Skorun: " +
-            score
-        );
+            alert(
+                "Oyun bitti! Skorun: " +
+                score +
+                "\n\n🪙 Coin: " +
+                coins
+            );
 
-    }, 100);
+        },
+        100
+    );
 }
 
 
-// ==============================
-// KLAVYE KONTROLÜ
-// ==============================
+// =====================================
+// KLAVYE
+// =====================================
 
 document.addEventListener(
     "keydown",
@@ -993,9 +1269,9 @@ document.addEventListener(
 );
 
 
-// ==============================
+// =====================================
 // TELEFON KAYDIRMA
-// ==============================
+// =====================================
 
 let touchStartX = 0;
 let touchStartY = 0;
@@ -1054,8 +1330,6 @@ canvas.addEventListener(
         }
 
 
-        // YATAY
-
         if (
             Math.abs(dx) >
             Math.abs(dy)
@@ -1084,10 +1358,7 @@ canvas.addEventListener(
                 };
             }
 
-
         }
-
-        // DİKEY
 
         else {
 
@@ -1122,11 +1393,18 @@ canvas.addEventListener(
 );
 
 
-// ==============================
+// =====================================
 // OYNA BUTONU
-// ==============================
+// =====================================
 
 startButton.addEventListener(
     "click",
     startGame
 );
+
+
+// =====================================
+// İLK COIN GÖSTER
+// =====================================
+
+drawCoinCounter();
