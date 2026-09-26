@@ -14,12 +14,25 @@ const grid = 20;
 
 let snake = [];
 let food = {};
-let direction = { x: grid, y: 0 };
-let nextDirection = { x: grid, y: 0 };
+
+let direction = {
+    x: grid,
+    y: 0
+};
+
+let nextDirection = {
+    x: grid,
+    y: 0
+};
 
 let score = 0;
 let gameRunning = false;
 let gameLoop;
+
+
+// ==============================
+// OYUNU BAŞLAT
+// ==============================
 
 function startGame() {
 
@@ -27,11 +40,19 @@ function startGame() {
         { x: 200, y: 200 },
         { x: 180, y: 200 },
         { x: 160, y: 200 },
-        { x: 140, y: 200 }
+        { x: 140, y: 200 },
+        { x: 120, y: 200 }
     ];
 
-    direction = { x: grid, y: 0 };
-    nextDirection = { x: grid, y: 0 };
+    direction = {
+        x: grid,
+        y: 0
+    };
+
+    nextDirection = {
+        x: grid,
+        y: 0
+    };
 
     score = 0;
 
@@ -50,6 +71,11 @@ function startGame() {
     draw();
 }
 
+
+// ==============================
+// OYUN GÜNCELLEME
+// ==============================
+
 function update() {
 
     direction = nextDirection;
@@ -59,18 +85,24 @@ function update() {
         y: snake[0].y + direction.y
     };
 
-    // Duvara çarpma
+
+    // DUVARA ÇARPMA
+
     if (
         head.x < 0 ||
         head.y < 0 ||
         head.x >= canvas.width ||
         head.y >= canvas.height
     ) {
+
         endGame();
+
         return;
     }
 
-    // Kendine çarpma
+
+    // KENDİNE ÇARPMA
+
     if (
         snake.some(
             part =>
@@ -78,13 +110,18 @@ function update() {
                 part.y === head.y
         )
     ) {
+
         endGame();
+
         return;
     }
 
+
     snake.unshift(head);
 
-    // Yem yeme
+
+    // YEM YENDİ
+
     if (
         head.x === food.x &&
         head.y === food.y
@@ -105,9 +142,15 @@ function update() {
     draw();
 }
 
+
+// ==============================
+// ÇİZİM
+// ==============================
+
 function draw() {
 
     // Arka plan
+
     ctx.fillStyle = "#101522";
 
     ctx.fillRect(
@@ -117,8 +160,11 @@ function draw() {
         canvas.height
     );
 
-    // Izgara
+
+    // IZGARA
+
     ctx.strokeStyle = "#182131";
+
     ctx.lineWidth = 1;
 
     for (
@@ -128,10 +174,17 @@ function draw() {
     ) {
 
         ctx.beginPath();
+
         ctx.moveTo(x, 0);
-        ctx.lineTo(x, canvas.height);
+
+        ctx.lineTo(
+            x,
+            canvas.height
+        );
+
         ctx.stroke();
     }
+
 
     for (
         let y = 0;
@@ -140,19 +193,33 @@ function draw() {
     ) {
 
         ctx.beginPath();
+
         ctx.moveTo(0, y);
-        ctx.lineTo(canvas.width, y);
+
+        ctx.lineTo(
+            canvas.width,
+            y
+        );
+
         ctx.stroke();
     }
 
+
     drawFood();
+
     drawSnake();
 }
+
+
+// ==============================
+// YEM
+// ==============================
 
 function drawFood() {
 
     const x = food.x + grid / 2;
     const y = food.y + grid / 2;
+
 
     const gradient =
         ctx.createRadialGradient(
@@ -161,25 +228,30 @@ function drawFood() {
             1,
             x,
             y,
-            10
+            11
         );
+
 
     gradient.addColorStop(
         0,
-        "#ff9bb2"
+        "#ffb1c2"
     );
+
 
     gradient.addColorStop(
         0.5,
         "#ff3d71"
     );
 
+
     gradient.addColorStop(
         1,
         "#8a1235"
     );
 
+
     ctx.fillStyle = gradient;
+
 
     ctx.beginPath();
 
@@ -194,270 +266,525 @@ function drawFood() {
     ctx.fill();
 }
 
+
+// ==============================
+// GERÇEKÇİ YILAN
+// ==============================
+
 function drawSnake() {
 
-    snake.forEach((part, index) => {
+    if (snake.length === 0) {
+        return;
+    }
 
-        const x = part.x + grid / 2;
-        const y = part.y + grid / 2;
 
-        // 🐍 BAŞ
-        if (index === 0) {
+    // ==========================
+    // TEK PARÇA GÖVDE
+    // ==========================
 
-            ctx.save();
+    const bodyGradient =
+        ctx.createLinearGradient(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
 
-            ctx.translate(x, y);
 
-            let angle = 0;
+    bodyGradient.addColorStop(
+        0,
+        "#91e76b"
+    );
 
-            if (direction.x > 0) {
-                angle = 0;
-            }
 
-            if (direction.x < 0) {
-                angle = Math.PI;
-            }
+    bodyGradient.addColorStop(
+        0.45,
+        "#4ca83d"
+    );
 
-            if (direction.y < 0) {
-                angle = -Math.PI / 2;
-            }
 
-            if (direction.y > 0) {
-                angle = Math.PI / 2;
-            }
+    bodyGradient.addColorStop(
+        1,
+        "#163c1a"
+    );
 
-            ctx.rotate(angle);
 
-            // Baş gölgesi
-            ctx.fillStyle =
-                "rgba(0,0,0,0.35)";
+    ctx.save();
 
-            ctx.beginPath();
 
-            ctx.ellipse(
-                1,
-                2,
-                14,
-                11,
-                0,
-                0,
-                Math.PI * 2
+    ctx.strokeStyle =
+        bodyGradient;
+
+    ctx.lineWidth = 17;
+
+    ctx.lineCap = "round";
+
+    ctx.lineJoin = "round";
+
+
+    ctx.beginPath();
+
+
+    // Kuyruktan başa doğru çiz
+
+    for (
+        let i = snake.length - 1;
+        i >= 0;
+        i--
+    ) {
+
+        const x =
+            snake[i].x +
+            grid / 2;
+
+        const y =
+            snake[i].y +
+            grid / 2;
+
+
+        if (
+            i === snake.length - 1
+        ) {
+
+            ctx.moveTo(
+                x,
+                y
             );
-
-            ctx.fill();
-
-            // Baş
-            const headGradient =
-                ctx.createRadialGradient(
-                    -4,
-                    -4,
-                    2,
-                    0,
-                    0,
-                    15
-                );
-
-            headGradient.addColorStop(
-                0,
-                "#a4e96d"
-            );
-
-            headGradient.addColorStop(
-                0.45,
-                "#4fae3e"
-            );
-
-            headGradient.addColorStop(
-                1,
-                "#163d1b"
-            );
-
-            ctx.fillStyle =
-                headGradient;
-
-            ctx.beginPath();
-
-            ctx.ellipse(
-                0,
-                0,
-                14,
-                10,
-                0,
-                0,
-                Math.PI * 2
-            );
-
-            ctx.fill();
-
-            // Gözler
-            ctx.fillStyle = "#f4df55";
-
-            ctx.beginPath();
-
-            ctx.arc(
-                7,
-                -6,
-                3.5,
-                0,
-                Math.PI * 2
-            );
-
-            ctx.arc(
-                7,
-                6,
-                3.5,
-                0,
-                Math.PI * 2
-            );
-
-            ctx.fill();
-
-            // Göz bebekleri
-            ctx.fillStyle = "#050505";
-
-            ctx.beginPath();
-
-            ctx.arc(
-                8,
-                -6,
-                1.5,
-                0,
-                Math.PI * 2
-            );
-
-            ctx.arc(
-                8,
-                6,
-                1.5,
-                0,
-                Math.PI * 2
-            );
-
-            ctx.fill();
-
-            // Çatallı dil
-            ctx.strokeStyle = "#ff3158";
-            ctx.lineWidth = 1.5;
-
-            ctx.beginPath();
-
-            ctx.moveTo(12, 0);
-            ctx.lineTo(20, 0);
-
-            ctx.moveTo(20, 0);
-            ctx.lineTo(24, -3);
-
-            ctx.moveTo(20, 0);
-            ctx.lineTo(24, 3);
-
-            ctx.stroke();
-
-            ctx.restore();
 
         } else {
 
-            // 🐍 GÖVDE
-
-            const radius =
-                Math.max(
-                    7,
-                    10 - index * 0.03
-                );
-
-            const gradient =
-                ctx.createRadialGradient(
-                    x - 3,
-                    y - 3,
-                    1,
-                    x,
-                    y,
-                    radius
-                );
-
-            gradient.addColorStop(
-                0,
-                "#8bdb5d"
-            );
-
-            gradient.addColorStop(
-                0.45,
-                "#4ca83d"
-            );
-
-            gradient.addColorStop(
-                1,
-                "#193f1d"
-            );
-
-            ctx.fillStyle =
-                gradient;
-
-            ctx.beginPath();
-
-            ctx.arc(
+            ctx.lineTo(
                 x,
-                y,
-                radius,
-                0,
-                Math.PI * 2
+                y
             );
-
-            ctx.fill();
-
-            // Pul deseni
-            ctx.strokeStyle =
-                "rgba(190,240,120,0.35)";
-
-            ctx.lineWidth = 1;
-
-            ctx.beginPath();
-
-            ctx.arc(
-                x,
-                y,
-                radius - 2,
-                0,
-                Math.PI
-            );
-
-            ctx.stroke();
-
-            // Gövde parlaklığı
-            ctx.fillStyle =
-                "rgba(210,255,160,0.18)";
-
-            ctx.beginPath();
-
-            ctx.arc(
-                x - 3,
-                y - 3,
-                2,
-                0,
-                Math.PI * 2
-            );
-
-            ctx.fill();
         }
-    });
+    }
+
+
+    ctx.stroke();
+
+
+    // ==========================
+    // GÖVDE PARLAKLIĞI
+    // ==========================
+
+    ctx.strokeStyle =
+        "rgba(210,255,160,0.18)";
+
+    ctx.lineWidth = 5;
+
+    ctx.beginPath();
+
+
+    for (
+        let i = snake.length - 1;
+        i >= 0;
+        i--
+    ) {
+
+        const x =
+            snake[i].x +
+            grid / 2;
+
+        const y =
+            snake[i].y +
+            grid / 2;
+
+
+        if (
+            i === snake.length - 1
+        ) {
+
+            ctx.moveTo(
+                x - 2,
+                y - 3
+            );
+
+        } else {
+
+            ctx.lineTo(
+                x - 2,
+                y - 3
+            );
+        }
+    }
+
+
+    ctx.stroke();
+
+
+    // ==========================
+    // PULLAR
+    // ==========================
+
+    ctx.strokeStyle =
+        "rgba(220,255,170,0.35)";
+
+    ctx.lineWidth = 1;
+
+
+    for (
+        let i = 2;
+        i < snake.length;
+        i += 2
+    ) {
+
+        const x =
+            snake[i].x +
+            grid / 2;
+
+        const y =
+            snake[i].y +
+            grid / 2;
+
+
+        ctx.beginPath();
+
+        ctx.arc(
+            x,
+            y,
+            6,
+            0,
+            Math.PI
+        );
+
+        ctx.stroke();
+    }
+
+
+    ctx.restore();
+
+
+    // ==========================
+    // YILAN BAŞI
+    // ==========================
+
+    const head = snake[0];
+
+
+    const headX =
+        head.x +
+        grid / 2;
+
+    const headY =
+        head.y +
+        grid / 2;
+
+
+    ctx.save();
+
+
+    ctx.translate(
+        headX,
+        headY
+    );
+
+
+    // Baş yönü
+
+    let angle = 0;
+
+
+    if (direction.x > 0) {
+
+        angle = 0;
+    }
+
+
+    if (direction.x < 0) {
+
+        angle = Math.PI;
+    }
+
+
+    if (direction.y < 0) {
+
+        angle = -Math.PI / 2;
+    }
+
+
+    if (direction.y > 0) {
+
+        angle = Math.PI / 2;
+    }
+
+
+    ctx.rotate(angle);
+
+
+    // ==========================
+    // BAŞ GÖLGESİ
+    // ==========================
+
+    ctx.fillStyle =
+        "rgba(0,0,0,0.35)";
+
+
+    ctx.beginPath();
+
+
+    ctx.ellipse(
+        2,
+        3,
+        16,
+        12,
+        0,
+        0,
+        Math.PI * 2
+    );
+
+
+    ctx.fill();
+
+
+    // ==========================
+    // BAŞ
+    // ==========================
+
+    const headGradient =
+        ctx.createRadialGradient(
+            -5,
+            -5,
+            2,
+            0,
+            0,
+            17
+        );
+
+
+    headGradient.addColorStop(
+        0,
+        "#b7f27b"
+    );
+
+
+    headGradient.addColorStop(
+        0.45,
+        "#55b642"
+    );
+
+
+    headGradient.addColorStop(
+        1,
+        "#143819"
+    );
+
+
+    ctx.fillStyle =
+        headGradient;
+
+
+    ctx.beginPath();
+
+
+    ctx.ellipse(
+        0,
+        0,
+        16,
+        11,
+        0,
+        0,
+        Math.PI * 2
+    );
+
+
+    ctx.fill();
+
+
+    // ==========================
+    // GÖZLER
+    // ==========================
+
+    ctx.fillStyle =
+        "#f5df55";
+
+
+    ctx.beginPath();
+
+
+    ctx.arc(
+        7,
+        -6,
+        3.5,
+        0,
+        Math.PI * 2
+    );
+
+
+    ctx.arc(
+        7,
+        6,
+        3.5,
+        0,
+        Math.PI * 2
+    );
+
+
+    ctx.fill();
+
+
+    // ==========================
+    // GÖZ BEBEKLERİ
+    // ==========================
+
+    ctx.fillStyle =
+        "#050505";
+
+
+    ctx.beginPath();
+
+
+    ctx.arc(
+        8,
+        -6,
+        1.6,
+        0,
+        Math.PI * 2
+    );
+
+
+    ctx.arc(
+        8,
+        6,
+        1.6,
+        0,
+        Math.PI * 2
+    );
+
+
+    ctx.fill();
+
+
+    // ==========================
+    // BURUN DELİKLERİ
+    // ==========================
+
+    ctx.fillStyle =
+        "#102510";
+
+
+    ctx.beginPath();
+
+
+    ctx.arc(
+        12,
+        -3,
+        1,
+        0,
+        Math.PI * 2
+    );
+
+
+    ctx.arc(
+        12,
+        3,
+        1,
+        0,
+        Math.PI * 2
+    );
+
+
+    ctx.fill();
+
+
+    // ==========================
+    // ÇATALLI DİL
+    // ==========================
+
+    ctx.strokeStyle =
+        "#ff3158";
+
+    ctx.lineWidth = 1.6;
+
+    ctx.lineCap = "round";
+
+
+    ctx.beginPath();
+
+
+    ctx.moveTo(
+        13,
+        0
+    );
+
+
+    ctx.lineTo(
+        21,
+        0
+    );
+
+
+    ctx.moveTo(
+        21,
+        0
+    );
+
+
+    ctx.lineTo(
+        25,
+        -3
+    );
+
+
+    ctx.moveTo(
+        21,
+        0
+    );
+
+
+    ctx.lineTo(
+        25,
+        3
+    );
+
+
+    ctx.stroke();
+
+
+    ctx.restore();
 }
+
+
+// ==============================
+// YEM OLUŞTUR
+// ==============================
 
 function createFood() {
 
-    food = {
+    let validPosition = false;
 
-        x:
-            Math.floor(
-                Math.random() *
-                (canvas.width / grid)
-            ) * grid,
 
-        y:
-            Math.floor(
-                Math.random() *
-                (canvas.height / grid)
-            ) * grid
-    };
+    while (!validPosition) {
+
+        food = {
+
+            x:
+                Math.floor(
+                    Math.random() *
+                    (canvas.width / grid)
+                ) * grid,
+
+            y:
+                Math.floor(
+                    Math.random() *
+                    (canvas.height / grid)
+                ) * grid
+        };
+
+
+        validPosition =
+            !snake.some(
+                part =>
+                    part.x === food.x &&
+                    part.y === food.y
+            );
+    }
 }
+
+
+// ==============================
+// OYUN BİTTİ
+// ==============================
 
 function endGame() {
 
@@ -467,6 +794,7 @@ function endGame() {
 
     startButton.textContent =
         "TEKRAR OYNA";
+
 
     setTimeout(() => {
 
@@ -479,13 +807,18 @@ function endGame() {
 }
 
 
-// ⌨️ KLAVYE KONTROLLERİ
+// ==============================
+// KLAVYE
+// ==============================
 
 document.addEventListener(
     "keydown",
     event => {
 
-        if (!gameRunning) return;
+        if (!gameRunning) {
+            return;
+        }
+
 
         if (
             event.key === "ArrowUp" &&
@@ -498,6 +831,7 @@ document.addEventListener(
             };
         }
 
+
         if (
             event.key === "ArrowDown" &&
             direction.y === 0
@@ -509,6 +843,7 @@ document.addEventListener(
             };
         }
 
+
         if (
             event.key === "ArrowLeft" &&
             direction.x === 0
@@ -519,6 +854,7 @@ document.addEventListener(
                 y: 0
             };
         }
+
 
         if (
             event.key === "ArrowRight" &&
@@ -534,10 +870,13 @@ document.addEventListener(
 );
 
 
-// 📱 TELEFON KAYDIRMA KONTROLÜ
+// ==============================
+// TELEFON KAYDIRMA
+// ==============================
 
 let touchStartX = 0;
 let touchStartY = 0;
+
 
 canvas.addEventListener(
     "touchstart",
@@ -551,33 +890,47 @@ canvas.addEventListener(
 
         touchStartY =
             touch.clientY;
+
     },
-    { passive: true }
+    {
+        passive: true
+    }
 );
+
 
 canvas.addEventListener(
     "touchend",
     event => {
 
-        if (!gameRunning) return;
+        if (!gameRunning) {
+            return;
+        }
+
 
         const touch =
             event.changedTouches[0];
+
 
         const dx =
             touch.clientX -
             touchStartX;
 
+
         const dy =
             touch.clientY -
             touchStartY;
+
 
         if (
             Math.abs(dx) < 20 &&
             Math.abs(dy) < 20
         ) {
+
             return;
         }
+
+
+        // YATAY
 
         if (
             Math.abs(dx) >
@@ -595,6 +948,7 @@ canvas.addEventListener(
                 };
             }
 
+
             if (
                 dx < 0 &&
                 direction.x === 0
@@ -606,7 +960,12 @@ canvas.addEventListener(
                 };
             }
 
-        } else {
+
+        }
+
+        // DİKEY
+
+        else {
 
             if (
                 dy > 0 &&
@@ -619,6 +978,7 @@ canvas.addEventListener(
                 };
             }
 
+
             if (
                 dy < 0 &&
                 direction.y === 0
@@ -630,12 +990,17 @@ canvas.addEventListener(
                 };
             }
         }
+
     },
-    { passive: true }
+    {
+        passive: true
+    }
 );
 
 
+// ==============================
 // OYNA BUTONU
+// ==============================
 
 startButton.addEventListener(
     "click",
