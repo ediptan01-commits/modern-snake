@@ -6,6 +6,11 @@ const canvas = document.createElement("canvas");
 canvas.width = 400;
 canvas.height = 400;
 
+canvas.style.display = "block";
+canvas.style.width = "100%";
+canvas.style.height = "100%";
+canvas.style.touchAction = "none";
+
 game.appendChild(canvas);
 
 const ctx = canvas.getContext("2d");
@@ -20,12 +25,18 @@ let direction = { x: grid, y: 0 };
 let nextDirection = { x: grid, y: 0 };
 
 let score = 0;
-let gameRunning = false;
-let gameLoop = null;
-
 let coins = Number(
     localStorage.getItem("modernSnakeCoins") || 0
 );
+
+let gameRunning = false;
+let gameLoop = null;
+
+let tongueTimer = 0;
+let tonguePower = 0;
+
+let eatingAnimation = 0;
+let eatenFood = null;
 
 let selectedSnake =
     localStorage.getItem("selectedSnake") || "python";
@@ -35,56 +46,55 @@ let ownedSnakes = JSON.parse(
     '["python"]'
 );
 
-let tongueTimer = 0;
-let tonguePower = 0;
 
-let eatingAnimation = 0;
-let eatenFood = null;
-
-
-// =====================================
+// =====================================================
 // YILANLAR
-// =====================================
+// =====================================================
 
 const snakes = {
 
     python: {
         name: "Piton",
         price: 0,
-        color: "brown"
+        type: "python"
     },
 
     cobra: {
         name: "Kobra",
         price: 50,
-        color: "cobra"
+        type: "cobra"
     },
 
     anaconda: {
         name: "Anakonda",
         price: 100,
-        color: "anaconda"
+        type: "anaconda"
     },
 
     kingcobra: {
         name: "Kral Kobra",
         price: 150,
-        color: "kingcobra"
+        type: "kingcobra"
     },
 
     albino: {
         name: "Albino Piton",
         price: 200,
-        color: "albino"
+        type: "albino"
     }
 };
 
 
-// =====================================
-// KAYDET
-// =====================================
+// =====================================================
+// VERİLERİ KAYDET
+// =====================================================
 
-function saveSnakeData() {
+function saveData() {
+
+    localStorage.setItem(
+        "modernSnakeCoins",
+        String(coins)
+    );
 
     localStorage.setItem(
         "selectedSnake",
@@ -95,17 +105,12 @@ function saveSnakeData() {
         "ownedSnakes",
         JSON.stringify(ownedSnakes)
     );
-
-    localStorage.setItem(
-        "modernSnakeCoins",
-        coins
-    );
 }
 
 
-// =====================================
-// COIN SAYACI
-// =====================================
+// =====================================================
+// COIN
+// =====================================================
 
 function drawCoinCounter() {
 
@@ -114,15 +119,26 @@ function drawCoinCounter() {
 
     if (!counter) {
 
-        counter = document.createElement("div");
+        counter =
+            document.createElement("div");
 
-        counter.id = "coinCounter";
+        counter.id =
+            "coinCounter";
 
-        counter.style.fontSize = "20px";
-        counter.style.fontWeight = "bold";
-        counter.style.color = "#ffd54a";
-        counter.style.marginBottom = "8px";
-        counter.style.textAlign = "center";
+        counter.style.textAlign =
+            "center";
+
+        counter.style.fontSize =
+            "22px";
+
+        counter.style.fontWeight =
+            "900";
+
+        counter.style.color =
+            "#ffd54a";
+
+        counter.style.margin =
+            "8px 0 12px";
 
         game.parentElement.insertBefore(
             counter,
@@ -135,312 +151,9 @@ function drawCoinCounter() {
 }
 
 
-// =====================================
-// YILAN MENÜSÜ
-// =====================================
-
-function createSnakeMenu() {
-
-    let old =
-        document.getElementById("snakeMenu");
-
-    if (old) {
-        old.remove();
-    }
-
-
-    const menu =
-        document.createElement("div");
-
-    menu.id = "snakeMenu";
-
-    menu.style.margin =
-        "15px auto";
-
-    menu.style.maxWidth =
-        "400px";
-
-    menu.style.padding =
-        "15px";
-
-    menu.style.borderRadius =
-        "20px";
-
-    menu.style.background =
-        "#111827";
-
-    menu.style.border =
-        "1px solid #263449";
-
-    menu.style.boxShadow =
-        "0 10px 30px rgba(0,0,0,.35)";
-
-
-    const title =
-        document.createElement("div");
-
-    title.textContent =
-        "🐍 YILANLAR";
-
-    title.style.color =
-        "#ffffff";
-
-    title.style.fontSize =
-        "22px";
-
-    title.style.fontWeight =
-        "bold";
-
-    title.style.textAlign =
-        "center";
-
-    title.style.marginBottom =
-        "12px";
-
-    menu.appendChild(title);
-
-
-    Object.keys(snakes).forEach(
-        id => {
-
-            const snakeData =
-                snakes[id];
-
-            const button =
-                document.createElement("button");
-
-            const owned =
-                ownedSnakes.includes(id);
-
-            const selected =
-                selectedSnake === id;
-
-
-            if (selected) {
-
-                button.textContent =
-                    "✓ " +
-                    snakeData.name +
-                    "  • SEÇİLİ";
-
-            } else if (owned) {
-
-                button.textContent =
-                    "🐍 " +
-                    snakeData.name +
-                    "  • SEÇ";
-
-            } else {
-
-                button.textContent =
-                    "🔒 " +
-                    snakeData.name +
-                    "  • " +
-                    snakeData.price +
-                    " 🪙";
-            }
-
-
-            button.style.display =
-                "block";
-
-            button.style.width =
-                "100%";
-
-            button.style.margin =
-                "8px 0";
-
-            button.style.padding =
-                "13px";
-
-            button.style.border =
-                "none";
-
-            button.style.borderRadius =
-                "12px";
-
-            button.style.fontSize =
-                "16px";
-
-            button.style.fontWeight =
-                "bold";
-
-            button.style.cursor =
-                "pointer";
-
-            button.style.background =
-
-function createSnakeMenu() {
-
-    const old = document.getElementById("snakeMenu");
-
-    if (old) {
-        old.remove();
-        return;
-    }
-
-    const menu = document.createElement("div");
-
-    menu.id = "snakeMenu";
-
-    menu.style.cssText = `
-        position:fixed;
-        inset:0;
-        width:100vw;
-        height:100vh;
-        background:rgba(3,8,18,.95);
-        backdrop-filter:blur(8px);
-        z-index:999999;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        padding:20px;
-        box-sizing:border-box;
-        overflow:hidden;
-    `;
-
-    const panel = document.createElement("div");
-
-    panel.style.cssText = `
-        width:100%;
-        max-width:380px;
-        max-height:88vh;
-        overflow-y:auto;
-        box-sizing:border-box;
-        padding:20px;
-        border-radius:24px;
-        background:linear-gradient(#18263d,#0d1524);
-        border:1px solid #00dfff;
-        box-shadow:0 0 35px #00dfff44;
-    `;
-
-    panel.innerHTML = `
-        <h2 style="
-            color:white;
-            text-align:center;
-            margin:0 0 8px;
-            font-size:28px;
-        ">🐍 YILANLAR</h2>
-
-        <div style="
-            color:#ffd54a;
-            text-align:center;
-            font-weight:bold;
-            margin-bottom:18px;
-        ">🪙 ${coins} COIN</div>
-    `;
-
-    Object.keys(snakes).forEach(id => {
-
-        const s = snakes[id];
-
-        const owned = ownedSnakes.includes(id);
-        const selected = selectedSnake === id;
-
-        const button =
-            document.createElement("button");
-
-        button.style.cssText = `
-            width:100%;
-            padding:15px;
-            margin:6px 0;
-            border:0;
-            border-radius:14px;
-            font-size:17px;
-            font-weight:bold;
-            text-align:left;
-            background:${selected ? "#00dfff" : "#24344d"};
-            color:${selected ? "#06202a" : "white"};
-        `;
-
-        if (selected) {
-
-            button.textContent =
-                "🐍 " + s.name + "  ✓ SEÇİLİ";
-
-        } else if (owned) {
-
-            button.textContent =
-                "🐍 " + s.name + "  → SEÇ";
-
-        } else {
-
-            button.textContent =
-                "🔒 " + s.name +
-                "   🪙 " + s.price;
-        }
-
-        button.onclick = () => {
-
-            if (owned) {
-
-                selectedSnake = id;
-
-                saveData();
-
-                menu.remove();
-
-                return;
-            }
-
-            if (coins >= s.price) {
-
-                coins -= s.price;
-
-                ownedSnakes.push(id);
-
-                selectedSnake = id;
-
-                saveData();
-
-                drawCoinCounter();
-
-                menu.remove();
-
-            } else {
-
-                alert(
-                    "Yeterli coin yok!\n\n" +
-                    s.name +
-                    " için " +
-                    s.price +
-                    " coin gerekiyor."
-                );
-            }
-        };
-
-        panel.appendChild(button);
-    });
-
-    const close =
-        document.createElement("button");
-
-    close.textContent = "KAPAT";
-
-    close.style.cssText = `
-        width:100%;
-        padding:14px;
-        margin-top:10px;
-        border:0;
-        border-radius:14px;
-        background:#ff3158;
-        color:white;
-        font-size:17px;
-        font-weight:bold;
-    `;
-
-    close.onclick = () => menu.remove();
-
-    panel.appendChild(close);
-
-    menu.appendChild(panel);
-
-    document.body.appendChild(menu);
-}
-
-// =====================================
+// =====================================================
 // YILANLAR BUTONU
-// =====================================
+// =====================================================
 
 function createSnakeButton() {
 
@@ -452,7 +165,6 @@ function createSnakeButton() {
     if (button) {
         return;
     }
-
 
     button =
         document.createElement("button");
@@ -466,30 +178,38 @@ function createSnakeButton() {
     button.style.display =
         "block";
 
+    button.style.width =
+        "calc(100% - 40px)";
+
+    button.style.maxWidth =
+        "400px";
+
     button.style.margin =
-        "10px auto";
+        "12px auto";
 
     button.style.padding =
-        "12px 30px";
+        "15px";
 
     button.style.border =
         "none";
 
     button.style.borderRadius =
-        "15px";
+        "16px";
 
     button.style.background =
-        "#243044";
+        "#26344b";
 
     button.style.color =
         "#ffffff";
 
     button.style.fontSize =
-        "17px";
+        "18px";
 
     button.style.fontWeight =
-        "bold";
+        "900";
 
+    button.style.boxShadow =
+        "0 8px 25px rgba(0,0,0,.25)";
 
     button.onclick =
         function () {
@@ -497,25 +217,557 @@ function createSnakeButton() {
             createSnakeMenu();
         };
 
-
     startButton.parentElement.appendChild(
         button
     );
 }
 
 
-// =====================================
+// =====================================================
+// TAM EKRAN YILAN MENÜSÜ
+// =====================================================
+
+function createSnakeMenu() {
+
+    const oldMenu =
+        document.getElementById(
+            "snakeMenu"
+        );
+
+    if (oldMenu) {
+
+        oldMenu.remove();
+
+        return;
+    }
+
+
+    // -------------------------------------------------
+    // ARKA PLAN
+    // -------------------------------------------------
+
+    const overlay =
+        document.createElement("div");
+
+    overlay.id =
+        "snakeMenu";
+
+
+    Object.assign(
+        overlay.style,
+        {
+            position: "fixed",
+            top: "0",
+            left: "0",
+            right: "0",
+            bottom: "0",
+
+            width: "100vw",
+            height: "100dvh",
+
+            boxSizing: "border-box",
+
+            background:
+                "rgba(4,9,20,.94)",
+
+            backdropFilter:
+                "blur(10px)",
+
+            WebkitBackdropFilter:
+                "blur(10px)",
+
+            zIndex: "999999",
+
+            display: "flex",
+
+            alignItems: "center",
+
+            justifyContent: "center",
+
+            padding:
+                "20px",
+
+            overflow:
+                "hidden"
+        }
+    );
+
+
+    // -------------------------------------------------
+    // PANEL
+    // -------------------------------------------------
+
+    const panel =
+        document.createElement("div");
+
+
+    Object.assign(
+        panel.style,
+        {
+            width: "100%",
+
+            maxWidth: "390px",
+
+            maxHeight: "90dvh",
+
+            boxSizing: "border-box",
+
+            overflowY: "auto",
+
+            overflowX: "hidden",
+
+            padding: "20px",
+
+            borderRadius: "24px",
+
+            background:
+                "linear-gradient(180deg,#18263d,#0d1524)",
+
+            border:
+                "1px solid rgba(0,225,255,.35)",
+
+            boxShadow:
+                "0 0 40px rgba(0,225,255,.22)",
+
+            scrollbarWidth: "thin"
+        }
+    );
+
+
+    // -------------------------------------------------
+    // BAŞLIK
+    // -------------------------------------------------
+
+    const title =
+        document.createElement("div");
+
+    title.innerHTML =
+        "🐍 YILANLAR";
+
+    Object.assign(
+        title.style,
+        {
+            color: "#ffffff",
+
+            fontSize: "28px",
+
+            fontWeight: "900",
+
+            textAlign: "center",
+
+            marginBottom: "8px"
+        }
+    );
+
+    panel.appendChild(title);
+
+
+    // -------------------------------------------------
+    // COIN
+    // -------------------------------------------------
+
+    const balance =
+        document.createElement("div");
+
+    balance.textContent =
+        "🪙 " + coins + " COIN";
+
+    Object.assign(
+        balance.style,
+        {
+            color: "#ffd54a",
+
+            fontSize: "18px",
+
+            fontWeight: "900",
+
+            textAlign: "center",
+
+            marginBottom: "18px"
+        }
+    );
+
+    panel.appendChild(balance);
+
+
+    // -------------------------------------------------
+    // YILAN LİSTESİ
+    // -------------------------------------------------
+
+    Object.keys(snakes).forEach(
+        id => {
+
+            const data =
+                snakes[id];
+
+            const owned =
+                ownedSnakes.includes(id);
+
+            const selected =
+                selectedSnake === id;
+
+
+            const item =
+                document.createElement("div");
+
+
+            Object.assign(
+                item.style,
+                {
+                    width: "100%",
+
+                    boxSizing: "border-box",
+
+                    padding: "13px",
+
+                    marginBottom: "10px",
+
+                    borderRadius: "17px",
+
+                    background:
+                        selected
+                            ? "linear-gradient(135deg,#00e5ff,#00aeca)"
+                            : "#202d43",
+
+                    border:
+                        selected
+                            ? "2px solid #8fffff"
+                            : "1px solid #34445d",
+
+                    color:
+                        "#ffffff"
+                }
+            );
+
+
+            // SATIR
+
+            const row =
+                document.createElement("div");
+
+
+            Object.assign(
+                row.style,
+                {
+                    width: "100%",
+
+                    display: "flex",
+
+                    alignItems: "center",
+
+                    gap: "10px",
+
+                    boxSizing: "border-box"
+                }
+            );
+
+
+            // İKON
+
+            const icon =
+                document.createElement("div");
+
+            icon.textContent =
+                "🐍";
+
+            icon.style.fontSize =
+                "32px";
+
+            icon.style.flexShrink =
+                "0";
+
+            row.appendChild(icon);
+
+
+            // BİLGİ
+
+            const info =
+                document.createElement("div");
+
+            info.style.flex =
+                "1";
+
+            info.style.minWidth =
+                "0";
+
+
+            const name =
+                document.createElement("div");
+
+            name.textContent =
+                data.name;
+
+            Object.assign(
+                name.style,
+                {
+                    fontSize: "17px",
+
+                    fontWeight: "900",
+
+                    color:
+                        selected
+                            ? "#06202a"
+                            : "#ffffff"
+                }
+            );
+
+            info.appendChild(name);
+
+
+            const status =
+                document.createElement("div");
+
+
+            if (selected) {
+
+                status.textContent =
+                    "✓ SEÇİLİ";
+
+            } else if (owned) {
+
+                status.textContent =
+                    "Kullanılabilir";
+
+            } else {
+
+                status.textContent =
+                    "🔒 " +
+                    data.price +
+                    " 🪙";
+            }
+
+
+            Object.assign(
+                status.style,
+                {
+                    marginTop: "3px",
+
+                    fontSize: "13px",
+
+                    fontWeight: "700",
+
+                    color:
+                        selected
+                            ? "#07303a"
+                            : "#aebbd0"
+                }
+            );
+
+
+            info.appendChild(status);
+
+            row.appendChild(info);
+
+
+            // BUTON
+
+            const button =
+                document.createElement("button");
+
+
+            if (selected) {
+
+                button.textContent =
+                    "SEÇİLİ";
+
+            } else if (owned) {
+
+                button.textContent =
+                    "SEÇ";
+
+            } else {
+
+                button.textContent =
+                    "AÇ";
+            }
+
+
+            Object.assign(
+                button.style,
+                {
+                    flexShrink: "0",
+
+                    border: "none",
+
+                    borderRadius: "10px",
+
+                    padding: "10px 12px",
+
+                    background:
+                        selected
+                            ? "#07303a"
+                            : "#00d9ff",
+
+                    color:
+                        selected
+                            ? "#ffffff"
+                            : "#061018",
+
+                    fontSize: "13px",
+
+                    fontWeight: "900"
+                }
+            );
+
+
+            button.onclick =
+                function () {
+
+                    // SAHİPSE SEÇ
+
+                    if (owned) {
+
+                        selectedSnake =
+                            id;
+
+                        saveData();
+
+                        overlay.remove();
+
+                        return;
+                    }
+
+
+                    // SATIN AL
+
+                    if (
+                        coins >=
+                        data.price
+                    ) {
+
+                        coins -=
+                            data.price;
+
+                        ownedSnakes.push(
+                            id
+                        );
+
+                        selectedSnake =
+                            id;
+
+                        saveData();
+
+                        drawCoinCounter();
+
+                        overlay.remove();
+
+                    } else {
+
+                        alert(
+                            data.name +
+                            " için " +
+                            data.price +
+                            " coin gerekiyor.\n\n" +
+                            "Mevcut coin: " +
+                            coins
+                        );
+                    }
+                };
+
+
+            row.appendChild(button);
+
+            item.appendChild(row);
+
+            panel.appendChild(item);
+        }
+    );
+
+
+    // -------------------------------------------------
+    // KAPAT
+    // -------------------------------------------------
+
+    const closeButton =
+        document.createElement("button");
+
+    closeButton.textContent =
+        "KAPAT";
+
+
+    Object.assign(
+        closeButton.style,
+        {
+            width: "100%",
+
+            padding: "14px",
+
+            marginTop: "5px",
+
+            border: "none",
+
+            borderRadius: "14px",
+
+            background: "#ff3158",
+
+            color: "#ffffff",
+
+            fontSize: "17px",
+
+            fontWeight: "900"
+        }
+    );
+
+
+    closeButton.onclick =
+        function () {
+
+            overlay.remove();
+        };
+
+
+    panel.appendChild(
+        closeButton
+    );
+
+
+    // -------------------------------------------------
+    // DIŞARI TIKLAMA
+    // -------------------------------------------------
+
+    overlay.addEventListener(
+        "click",
+        event => {
+
+            if (
+                event.target ===
+                overlay
+            ) {
+
+                overlay.remove();
+            }
+        }
+    );
+
+
+    overlay.appendChild(
+        panel
+    );
+
+    document.body.appendChild(
+        overlay
+    );
+}
+
+
+// =====================================================
 // OYUNU BAŞLAT
-// =====================================
+// =====================================================
 
 function startGame() {
 
     snake = [
+
         { x: 200, y: 200 },
+
         { x: 180, y: 200 },
+
         { x: 160, y: 200 },
+
         { x: 140, y: 200 },
+
         { x: 120, y: 200 }
+
     ];
 
 
@@ -534,9 +786,11 @@ function startGame() {
     score = 0;
 
     tongueTimer = 0;
+
     tonguePower = 0;
 
     eatingAnimation = 0;
+
     eatenFood = null;
 
 
@@ -545,17 +799,21 @@ function startGame() {
 
 
     createFood();
+
     createCoin();
 
 
-    gameRunning = true;
+    gameRunning =
+        true;
 
 
     startButton.textContent =
         "YENİDEN BAŞLAT";
 
 
-    clearInterval(gameLoop);
+    clearInterval(
+        gameLoop
+    );
 
 
     gameLoop =
@@ -571,9 +829,9 @@ function startGame() {
 }
 
 
-// =====================================
+// =====================================================
 // OYUN GÜNCELLE
-// =====================================
+// =====================================================
 
 function update() {
 
@@ -601,10 +859,17 @@ function update() {
     // DUVAR
 
     if (
+
         head.x < 0 ||
+
         head.y < 0 ||
-        head.x >= canvas.width ||
-        head.y >= canvas.height
+
+        head.x >=
+            canvas.width ||
+
+        head.y >=
+            canvas.height
+
     ) {
 
         endGame();
@@ -616,11 +881,17 @@ function update() {
     // KENDİNE ÇARPMA
 
     if (
+
         snake.some(
             part =>
-                part.x === head.x &&
-                part.y === head.y
+
+                part.x ===
+                head.x &&
+
+                part.y ===
+                head.y
         )
+
     ) {
 
         endGame();
@@ -632,15 +903,22 @@ function update() {
     snake.unshift(head);
 
 
-    // =================================
+    // =================================================
     // YEM
-    // =================================
+    // =================================================
 
     if (
+
         food &&
-        head.x === food.x &&
-        head.y === food.y &&
+
+        head.x ===
+        food.x &&
+
+        head.y ===
+        food.y &&
+
         eatingAnimation === 0
+
     ) {
 
         score += 10;
@@ -678,19 +956,25 @@ function update() {
     }
 
 
-    // =================================
+    // =================================================
     // COIN
-    // =================================
+    // =================================================
 
     if (
+
         coin &&
-        head.x === coin.x &&
-        head.y === coin.y
+
+        head.x ===
+        coin.x &&
+
+        head.y ===
+        coin.y
+
     ) {
 
         coins++;
 
-        saveSnakeData();
+        saveData();
 
         drawCoinCounter();
 
@@ -698,9 +982,9 @@ function update() {
     }
 
 
-    // =================================
+    // =================================================
     // DİL
-    // =================================
+    // =================================================
 
     if (
         tongueTimer > 0
@@ -717,9 +1001,9 @@ function update() {
     }
 
 
-    // =================================
+    // =================================================
     // YEM ANİMASYONU
-    // =================================
+    // =================================================
 
     if (
         eatingAnimation > 0
@@ -743,9 +1027,9 @@ function update() {
 }
 
 
-// =====================================
-// ANA ÇİZİM
-// =====================================
+// =====================================================
+// ÇİZİM
+// =====================================================
 
 function draw() {
 
@@ -821,9 +1105,9 @@ function draw() {
 }
 
 
-// =====================================
+// =====================================================
 // YEM
-// =====================================
+// =====================================================
 
 function drawFood() {
 
@@ -874,12 +1158,19 @@ function drawFood() {
 
     const gradient =
         ctx.createRadialGradient(
+
             x - 3,
+
             y - 3,
+
             1,
+
             x,
+
             y,
+
             11
+
         );
 
 
@@ -890,7 +1181,7 @@ function drawFood() {
 
 
     gradient.addColorStop(
-        0.5,
+        .5,
         "#ff3d71"
     );
 
@@ -920,11 +1211,6 @@ function drawFood() {
     ctx.fill();
 }
 
-
-// =====================================
-// COIN
-// =====================================
-
 function drawCoin() {
 
     if (!coin) {
@@ -951,12 +1237,19 @@ function drawCoin() {
 
     const gradient =
         ctx.createRadialGradient(
+
             x - 3,
+
             y - 3,
+
             1,
+
             x,
+
             y,
+
             10
+
         );
 
 
@@ -967,7 +1260,7 @@ function drawCoin() {
 
 
     gradient.addColorStop(
-        0.45,
+        .45,
         "#ffd54a"
     );
 
@@ -997,8 +1290,7 @@ function drawCoin() {
     ctx.fill();
 
 
-    ctx.shadowBlur =
-        0;
+    ctx.shadowBlur = 0;
 
 
     ctx.fillStyle =
@@ -1025,9 +1317,9 @@ function drawCoin() {
 }
 
 
-// =====================================
-// YILAN
-// =====================================
+// =====================================================
+// YILAN ÇİZ
+// =====================================================
 
 function drawSnake() {
 
@@ -1038,82 +1330,65 @@ function drawSnake() {
     }
 
 
-    const style =
-        snakes[selectedSnake];
-
-
-    let bodyColors;
+    let colors;
 
 
     if (
-        style.color ===
-        "brown"
+        selectedSnake ===
+        "python"
     ) {
 
-        bodyColors =
-            [
-                "#d6a75b",
-                "#a8753f",
-                "#70472c",
-                "#3d281d"
-            ];
-    }
+        colors = [
+            "#d6a75b",
+            "#a8753f",
+            "#70472c",
+            "#3d281d"
+        ];
 
-
-    else if (
-        style.color ===
+    } else if (
+        selectedSnake ===
         "cobra"
     ) {
 
-        bodyColors =
-            [
-                "#6f8f55",
-                "#3f6034",
-                "#263b24",
-                "#182719"
-            ];
-    }
+        colors = [
+            "#91ad65",
+            "#587642",
+            "#344c2d",
+            "#1d2c1a"
+        ];
 
-
-    else if (
-        style.color ===
+    } else if (
+        selectedSnake ===
         "anaconda"
     ) {
 
-        bodyColors =
-            [
-                "#657047",
-                "#39462d",
-                "#20291c",
-                "#11170f"
-            ];
-    }
+        colors = [
+            "#758653",
+            "#4c6037",
+            "#2d3b22",
+            "#182015"
+        ];
 
-
-    else if (
-        style.color ===
+    } else if (
+        selectedSnake ===
         "kingcobra"
     ) {
 
-        bodyColors =
-            [
-                "#c9a85d",
-                "#8b6a32",
-                "#49391d",
-                "#211b10"
-            ];
-    }
+        colors = [
+            "#d2b766",
+            "#96763b",
+            "#59451f",
+            "#2d220f"
+        ];
 
+    } else {
 
-    else {
-
-        bodyColors =
-            [
-                "#fff4c4",
-                "#e9d48a",
-                "#c5a85e",
-                "#8d743e"
-            ];
+        colors = [
+            "#fff5c9",
+            "#e8d58e",
+            "#c7aa62",
+            "#8d753e"
+        ];
     }
 
 
@@ -1128,25 +1403,22 @@ function drawSnake() {
 
     gradient.addColorStop(
         0,
-        bodyColors[0]
+        colors[0]
     );
-
 
     gradient.addColorStop(
-        0.35,
-        bodyColors[1]
+        .35,
+        colors[1]
     );
-
 
     gradient.addColorStop(
-        0.7,
-        bodyColors[2]
+        .7,
+        colors[2]
     );
-
 
     gradient.addColorStop(
         1,
-        bodyColors[3]
+        colors[3]
     );
 
 
@@ -1174,27 +1446,24 @@ function drawSnake() {
 
     drawSmoothSnakePath();
 
-
     ctx.stroke();
 
 
-    // PARLAKLIK
+    // PARLAK ÜST KISIM
 
     ctx.strokeStyle =
-        "rgba(255,230,170,0.30)";
+        "rgba(255,235,170,.28)";
 
 
-    ctx.lineWidth =
-        4;
+    ctx.lineWidth = 4;
 
 
     drawSmoothSnakePath();
 
-
     ctx.stroke();
 
 
-    // DESENLER
+    // DESEN
 
     for (
         let i = 1;
@@ -1221,10 +1490,8 @@ function drawSnake() {
                 x,
                 y
             );
-        }
 
-
-        else if (
+        } else if (
             selectedSnake ===
             "anaconda"
         ) {
@@ -1233,10 +1500,8 @@ function drawSnake() {
                 x,
                 y
             );
-        }
 
-
-        else if (
+        } else if (
             selectedSnake ===
             "cobra"
         ) {
@@ -1245,10 +1510,8 @@ function drawSnake() {
                 x,
                 y
             );
-        }
 
-
-        else if (
+        } else if (
             selectedSnake ===
             "kingcobra"
         ) {
@@ -1257,10 +1520,8 @@ function drawSnake() {
                 x,
                 y
             );
-        }
 
-
-        else {
+        } else {
 
             drawAlbinoPattern(
                 x,
@@ -1275,11 +1536,338 @@ function drawSnake() {
 
     drawSnakeHead();
 }
+// =====================================================
+// COIN ÇİZ
+// =====================================================
+
+function drawCoin() {
+
+    if (!coin) {
+        return;
+    }
 
 
-// =====================================
-// PITON DESENİ
-// =====================================
+    const x =
+        coin.x +
+        grid / 2;
+
+
+    const y =
+        coin.y +
+        grid / 2;
+
+
+    ctx.shadowColor =
+        "#ffd54a";
+
+    ctx.shadowBlur =
+        12;
+
+
+    const gradient =
+        ctx.createRadialGradient(
+
+            x - 3,
+
+            y - 3,
+
+            1,
+
+            x,
+
+            y,
+
+            10
+
+        );
+
+
+    gradient.addColorStop(
+        0,
+        "#fff6a0"
+    );
+
+
+    gradient.addColorStop(
+        .45,
+        "#ffd54a"
+    );
+
+
+    gradient.addColorStop(
+        1,
+        "#c88700"
+    );
+
+
+    ctx.fillStyle =
+        gradient;
+
+
+    ctx.beginPath();
+
+
+    ctx.arc(
+        x,
+        y,
+        8,
+        0,
+        Math.PI * 2
+    );
+
+
+    ctx.fill();
+
+
+    ctx.shadowBlur = 0;
+
+
+    ctx.fillStyle =
+        "#8a5c00";
+
+
+    ctx.font =
+        "bold 11px Arial";
+
+
+    ctx.textAlign =
+        "center";
+
+
+    ctx.textBaseline =
+        "middle";
+
+
+    ctx.fillText(
+        "$",
+        x,
+        y + 1
+    );
+}
+
+
+// =====================================================
+// YILAN ÇİZ
+// =====================================================
+
+function drawSnake() {
+
+    if (
+        snake.length === 0
+    ) {
+        return;
+    }
+
+
+    let colors;
+
+
+    if (
+        selectedSnake ===
+        "python"
+    ) {
+
+        colors = [
+            "#d6a75b",
+            "#a8753f",
+            "#70472c",
+            "#3d281d"
+        ];
+
+    } else if (
+        selectedSnake ===
+        "cobra"
+    ) {
+
+        colors = [
+            "#91ad65",
+            "#587642",
+            "#344c2d",
+            "#1d2c1a"
+        ];
+
+    } else if (
+        selectedSnake ===
+        "anaconda"
+    ) {
+
+        colors = [
+            "#758653",
+            "#4c6037",
+            "#2d3b22",
+            "#182015"
+        ];
+
+    } else if (
+        selectedSnake ===
+        "kingcobra"
+    ) {
+
+        colors = [
+            "#d2b766",
+            "#96763b",
+            "#59451f",
+            "#2d220f"
+        ];
+
+    } else {
+
+        colors = [
+            "#fff5c9",
+            "#e8d58e",
+            "#c7aa62",
+            "#8d753e"
+        ];
+    }
+
+
+    const gradient =
+        ctx.createLinearGradient(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+
+
+    gradient.addColorStop(
+        0,
+        colors[0]
+    );
+
+    gradient.addColorStop(
+        .35,
+        colors[1]
+    );
+
+    gradient.addColorStop(
+        .7,
+        colors[2]
+    );
+
+    gradient.addColorStop(
+        1,
+        colors[3]
+    );
+
+
+    ctx.save();
+
+
+    ctx.strokeStyle =
+        gradient;
+
+
+    ctx.lineWidth =
+        selectedSnake ===
+        "anaconda"
+            ? 22
+            : 19;
+
+
+    ctx.lineCap =
+        "round";
+
+
+    ctx.lineJoin =
+        "round";
+
+
+    drawSmoothSnakePath();
+
+    ctx.stroke();
+
+
+    // PARLAK ÜST KISIM
+
+    ctx.strokeStyle =
+        "rgba(255,235,170,.28)";
+
+
+    ctx.lineWidth = 4;
+
+
+    drawSmoothSnakePath();
+
+    ctx.stroke();
+
+
+    // DESEN
+
+    for (
+        let i = 1;
+        i < snake.length;
+        i++
+    ) {
+
+        const x =
+            snake[i].x +
+            grid / 2;
+
+
+        const y =
+            snake[i].y +
+            grid / 2;
+
+
+        if (
+            selectedSnake ===
+            "python"
+        ) {
+
+            drawPythonPattern(
+                x,
+                y
+            );
+
+        } else if (
+            selectedSnake ===
+            "anaconda"
+        ) {
+
+            drawAnacondaPattern(
+                x,
+                y
+            );
+
+        } else if (
+            selectedSnake ===
+            "cobra"
+        ) {
+
+            drawCobraPattern(
+                x,
+                y
+            );
+
+        } else if (
+            selectedSnake ===
+            "kingcobra"
+        ) {
+
+            drawKingCobraPattern(
+                x,
+                y
+            );
+
+        } else {
+
+            drawAlbinoPattern(
+                x,
+                y
+            );
+        }
+    }
+
+
+    ctx.restore();
+
+
+    drawSnakeHead();
+}
+ // =====================================================
+// PITON DESEN
+// =====================================================
 
 function drawPythonPattern(
     x,
@@ -1308,9 +1896,9 @@ function drawPythonPattern(
 }
 
 
-// =====================================
-// ANAKONDA DESENİ
-// =====================================
+// =====================================================
+// ANAKONDA DESEN
+// =====================================================
 
 function drawAnacondaPattern(
     x,
@@ -1339,9 +1927,9 @@ function drawAnacondaPattern(
 }
 
 
-// =====================================
-// KOBRA DESENİ
-// =====================================
+// =====================================================
+// KOBRA DESEN
+// =====================================================
 
 function drawCobraPattern(
     x,
@@ -1352,8 +1940,7 @@ function drawCobraPattern(
         "rgba(210,230,160,.45)";
 
 
-    ctx.lineWidth =
-        2;
+    ctx.lineWidth = 2;
 
 
     ctx.beginPath();
@@ -1375,9 +1962,9 @@ function drawCobraPattern(
 }
 
 
-// =====================================
-// KRAL KOBRA
-// =====================================
+// =====================================================
+// KRAL KOBRA DESEN
+// =====================================================
 
 function drawKingCobraPattern(
     x,
@@ -1388,8 +1975,7 @@ function drawKingCobraPattern(
         "rgba(25,20,10,.75)";
 
 
-    ctx.lineWidth =
-        2;
+    ctx.lineWidth = 2;
 
 
     ctx.beginPath();
@@ -1411,9 +1997,9 @@ function drawKingCobraPattern(
 }
 
 
-// =====================================
-// ALBİNO
-// =====================================
+// =====================================================
+// ALBİNO DESEN
+// =====================================================
 
 function drawAlbinoPattern(
     x,
@@ -1440,9 +2026,9 @@ function drawAlbinoPattern(
 }
 
 
-// =====================================
+// =====================================================
 // YUMUŞAK GÖVDE
-// =====================================
+// =====================================================
 
 function drawSmoothSnakePath() {
 
@@ -1456,6 +2042,7 @@ function drawSmoothSnakePath() {
     const points =
         snake.map(
             part => ({
+
                 x:
                     part.x +
                     grid / 2,
@@ -1471,6 +2058,7 @@ function drawSmoothSnakePath() {
 
 
     ctx.moveTo(
+
         points[
             points.length - 1
         ].x,
@@ -1478,6 +2066,7 @@ function drawSmoothSnakePath() {
         points[
             points.length - 1
         ].y
+
     );
 
 
@@ -1513,10 +2102,15 @@ function drawSmoothSnakePath() {
 
 
         ctx.quadraticCurveTo(
+
             current.x,
+
             current.y,
+
             midX,
+
             midY
+
         );
     }
 
@@ -1530,17 +2124,21 @@ function drawSmoothSnakePath() {
 
 
     ctx.quadraticCurveTo(
+
         second.x,
+
         second.y,
+
         first.x,
+
         first.y
+
     );
 }
 
-
-// =====================================
+// =====================================================
 // YILAN BAŞI
-// =====================================
+// =====================================================
 
 function drawSnakeHead() {
 
@@ -1573,28 +2171,27 @@ function drawSnakeHead() {
     if (
         direction.x > 0
     ) {
+
         angle = 0;
-    }
 
-
-    if (
+    } else if (
         direction.x < 0
     ) {
-        angle = Math.PI;
-    }
 
+        angle =
+            Math.PI;
 
-    if (
+    } else if (
         direction.y < 0
     ) {
+
         angle =
             -Math.PI / 2;
-    }
 
-
-    if (
+    } else if (
         direction.y > 0
     ) {
+
         angle =
             Math.PI / 2;
     }
@@ -1603,11 +2200,7 @@ function drawSnakeHead() {
     ctx.rotate(angle);
 
 
-    const style =
-        snakes[selectedSnake];
-
-
-    // KOBRA BAŞLIĞI
+    // KOBRA BOYUNU
 
     if (
         selectedSnake ===
@@ -1619,15 +2212,15 @@ function drawSnakeHead() {
         ctx.fillStyle =
             selectedSnake ===
             "cobra"
-                ? "#526b3e"
-                : "#725b2b";
+                ? "#536d3e"
+                : "#735c2d";
 
 
         ctx.beginPath();
 
 
         ctx.ellipse(
-            -4,
+            -5,
             0,
             25,
             18,
@@ -1644,7 +2237,7 @@ function drawSnakeHead() {
     // GÖLGE
 
     ctx.fillStyle =
-        "rgba(0,0,0,.4)";
+        "rgba(0,0,0,.42)";
 
 
     ctx.beginPath();
@@ -1664,7 +2257,7 @@ function drawSnakeHead() {
     ctx.fill();
 
 
-    // BAŞ GRADIENT
+    // BAŞ
 
     const headGradient =
         ctx.createRadialGradient(
@@ -1678,103 +2271,95 @@ function drawSnakeHead() {
 
 
     if (
-        style.color ===
-        "brown"
+        selectedSnake ===
+        "python"
     ) {
 
         headGradient.addColorStop(
             0,
-            "#e0b86e"
+            "#e4bd74"
         );
 
         headGradient.addColorStop(
-            .45,
-            "#a97842"
+            .5,
+            "#a87842"
         );
 
         headGradient.addColorStop(
             1,
             "#4b3021"
         );
-    }
 
-
-    else if (
-        style.color ===
+    } else if (
+        selectedSnake ===
         "cobra"
     ) {
 
         headGradient.addColorStop(
             0,
-            "#9bbd75"
+            "#a8c97d"
         );
 
         headGradient.addColorStop(
             .5,
-            "#527342"
+            "#587944"
         );
 
         headGradient.addColorStop(
             1,
-            "#20311d"
+            "#20321c"
         );
-    }
 
-
-    else if (
-        style.color ===
+    } else if (
+        selectedSnake ===
         "anaconda"
     ) {
 
         headGradient.addColorStop(
             0,
-            "#81905c"
+            "#8b9c63"
         );
 
         headGradient.addColorStop(
             .5,
-            "#4c5c36"
+            "#52663a"
         );
 
         headGradient.addColorStop(
             1,
-            "#20291a"
+            "#202a19"
         );
-    }
 
-
-    else if (
-        style.color ===
+    } else if (
+        selectedSnake ===
         "kingcobra"
     ) {
 
         headGradient.addColorStop(
             0,
-            "#d7bd73"
+            "#dfc77d"
         );
 
         headGradient.addColorStop(
             .5,
-            "#8e7138"
+            "#92753b"
         );
 
         headGradient.addColorStop(
             1,
             "#302511"
         );
-    }
 
-
-    else {
+    } else {
 
         headGradient.addColorStop(
             0,
-            "#fff7d4"
+            "#fff8d8"
         );
 
         headGradient.addColorStop(
             .5,
-            "#e8d38d"
+            "#e8d58e"
         );
 
         headGradient.addColorStop(
@@ -1810,7 +2395,7 @@ function drawSnakeHead() {
     ctx.fillStyle =
         selectedSnake ===
         "albino"
-            ? "#d85b68"
+            ? "#e05b6d"
             : "#d9b62e";
 
 
@@ -1915,14 +2500,14 @@ function drawSnakeHead() {
     ctx.restore();
 }
 
-
-// =====================================
-// DİL
-// =====================================
+// =====================================================
+// DİL ANİMASYONU
+// =====================================================
 
 function drawTongue() {
 
-    const length = 32;
+    const length =
+        32;
 
 
     ctx.strokeStyle =
@@ -1980,9 +2565,9 @@ function drawTongue() {
 }
 
 
-// =====================================
+// =====================================================
 // YEM OLUŞTUR
-// =====================================
+// =====================================================
 
 function createFood() {
 
@@ -1996,13 +2581,19 @@ function createFood() {
             x:
                 Math.floor(
                     Math.random() *
-                    (canvas.width / grid)
+                    (
+                        canvas.width /
+                        grid
+                    )
                 ) * grid,
 
             y:
                 Math.floor(
                     Math.random() *
-                    (canvas.height / grid)
+                    (
+                        canvas.height /
+                        grid
+                    )
                 ) * grid
         };
 
@@ -2010,16 +2601,20 @@ function createFood() {
         valid =
             !snake.some(
                 part =>
-                    part.x === food.x &&
-                    part.y === food.y
+
+                    part.x ===
+                    food.x &&
+
+                    part.y ===
+                    food.y
             );
     }
 }
 
 
-// =====================================
+// =====================================================
 // COIN OLUŞTUR
-// =====================================
+// =====================================================
 
 function createCoin() {
 
@@ -2033,13 +2628,19 @@ function createCoin() {
             x:
                 Math.floor(
                     Math.random() *
-                    (canvas.width / grid)
+                    (
+                        canvas.width /
+                        grid
+                    )
                 ) * grid,
 
             y:
                 Math.floor(
                     Math.random() *
-                    (canvas.height / grid)
+                    (
+                        canvas.height /
+                        grid
+                    )
                 ) * grid
         };
 
@@ -2047,15 +2648,23 @@ function createCoin() {
         valid =
             !snake.some(
                 part =>
-                    part.x === coin.x &&
-                    part.y === coin.y
+
+                    part.x ===
+                    coin.x &&
+
+                    part.y ===
+                    coin.y
             );
 
 
         if (
             food &&
-            coin.x === food.x &&
-            coin.y === food.y
+
+            coin.x ===
+            food.x &&
+
+            coin.y ===
+            food.y
         ) {
 
             valid = false;
@@ -2064,15 +2673,19 @@ function createCoin() {
 }
 
 
-// =====================================
+// =====================================================
 // OYUN BİTTİ
-// =====================================
+// =====================================================
 
 function endGame() {
 
-    gameRunning = false;
+    gameRunning =
+        false;
 
-    clearInterval(gameLoop);
+
+    clearInterval(
+        gameLoop
+    );
 
 
     startButton.textContent =
@@ -2080,12 +2693,14 @@ function endGame() {
 
 
     setTimeout(
-        () => {
+        function () {
 
             alert(
-                "Oyun bitti! Skorun: " +
+                "Oyun bitti!\n\n" +
+                "Skor: " +
                 score +
-                "\n\n🪙 Coin: " +
+                "\n" +
+                "🪙 Coin: " +
                 coins
             );
 
@@ -2095,13 +2710,13 @@ function endGame() {
 }
 
 
-// =====================================
+// =====================================================
 // KLAVYE
-// =====================================
+// =====================================================
 
 document.addEventListener(
     "keydown",
-    event => {
+    function (event) {
 
         if (!gameRunning) {
             return;
@@ -2109,8 +2724,12 @@ document.addEventListener(
 
 
         if (
-            event.key === "ArrowUp" &&
+
+            event.key ===
+            "ArrowUp" &&
+
             direction.y === 0
+
         ) {
 
             nextDirection = {
@@ -2121,8 +2740,12 @@ document.addEventListener(
 
 
         if (
-            event.key === "ArrowDown" &&
+
+            event.key ===
+            "ArrowDown" &&
+
             direction.y === 0
+
         ) {
 
             nextDirection = {
@@ -2133,8 +2756,12 @@ document.addEventListener(
 
 
         if (
-            event.key === "ArrowLeft" &&
+
+            event.key ===
+            "ArrowLeft" &&
+
             direction.x === 0
+
         ) {
 
             nextDirection = {
@@ -2145,8 +2772,12 @@ document.addEventListener(
 
 
         if (
-            event.key === "ArrowRight" &&
+
+            event.key ===
+            "ArrowRight" &&
+
             direction.x === 0
+
         ) {
 
             nextDirection = {
@@ -2158,9 +2789,9 @@ document.addEventListener(
 );
 
 
-// =====================================
+// =====================================================
 // TELEFON KONTROLÜ
-// =====================================
+// =====================================================
 
 let touchStartX = 0;
 let touchStartY = 0;
@@ -2168,7 +2799,7 @@ let touchStartY = 0;
 
 canvas.addEventListener(
     "touchstart",
-    event => {
+    function (event) {
 
         const touch =
             event.touches[0];
@@ -2180,6 +2811,7 @@ canvas.addEventListener(
 
         touchStartY =
             touch.clientY;
+
     },
     {
         passive: true
@@ -2189,7 +2821,7 @@ canvas.addEventListener(
 
 canvas.addEventListener(
     "touchend",
-    event => {
+    function (event) {
 
         if (!gameRunning) {
             return;
@@ -2211,8 +2843,11 @@ canvas.addEventListener(
 
 
         if (
+
             Math.abs(dx) < 20 &&
+
             Math.abs(dy) < 20
+
         ) {
 
             return;
@@ -2220,13 +2855,18 @@ canvas.addEventListener(
 
 
         if (
+
             Math.abs(dx) >
             Math.abs(dy)
+
         ) {
 
             if (
+
                 dx > 0 &&
+
                 direction.x === 0
+
             ) {
 
                 nextDirection = {
@@ -2237,8 +2877,11 @@ canvas.addEventListener(
 
 
             if (
+
                 dx < 0 &&
+
                 direction.x === 0
+
             ) {
 
                 nextDirection = {
@@ -2250,8 +2893,11 @@ canvas.addEventListener(
         } else {
 
             if (
+
                 dy > 0 &&
+
                 direction.y === 0
+
             ) {
 
                 nextDirection = {
@@ -2262,8 +2908,11 @@ canvas.addEventListener(
 
 
             if (
+
                 dy < 0 &&
+
                 direction.y === 0
+
             ) {
 
                 nextDirection = {
@@ -2279,15 +2928,19 @@ canvas.addEventListener(
 );
 
 
-// =====================================
-// BUTONLAR
-// =====================================
+// =====================================================
+// BAŞLAT
+// =====================================================
 
 startButton.addEventListener(
     "click",
     startGame
 );
 
+
+// =====================================================
+// İLK AYARLAR
+// =====================================================
 
 drawCoinCounter();
 
