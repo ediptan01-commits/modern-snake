@@ -14,7 +14,7 @@ const ctx = canvas.getContext("2d");
 const grid = 20;
 
 let snake = [];
-let food = {};
+let food = null;
 
 let direction = {
     x: grid,
@@ -28,16 +28,22 @@ let nextDirection = {
 
 let score = 0;
 let gameRunning = false;
-let gameLoop;
+let gameLoop = null;
 
-// Dil animasyonu
+// ==============================
+// DİL / YEM ANİMASYONU
+// ==============================
+
 let tongueTimer = 0;
 let tonguePower = 0;
 
+let eatingAnimation = 0;
+let eatenFood = null;
 
-// =====================================
+
+// ==============================
 // OYUNU BAŞLAT
-// =====================================
+// ==============================
 
 function startGame() {
 
@@ -64,6 +70,9 @@ function startGame() {
     tongueTimer = 0;
     tonguePower = 0;
 
+    eatingAnimation = 0;
+    eatenFood = null;
+
     scoreText.textContent = "Skor: 0";
 
     createFood();
@@ -80,11 +89,15 @@ function startGame() {
 }
 
 
-// =====================================
-// OYUN GÜNCELLEME
-// =====================================
+// ==============================
+// OYUN GÜNCELLE
+// ==============================
 
 function update() {
+
+    if (!gameRunning) {
+        return;
+    }
 
     direction = nextDirection;
 
@@ -94,7 +107,10 @@ function update() {
     };
 
 
-    // Duvar
+    // ==========================
+    // DUVAR
+    // ==========================
+
     if (
         head.x < 0 ||
         head.y < 0 ||
@@ -108,7 +124,10 @@ function update() {
     }
 
 
-    // Kendine çarpma
+    // ==========================
+    // KENDİNE ÇARPMA
+    // ==========================
+
     if (
         snake.some(
             part =>
@@ -126,13 +145,15 @@ function update() {
     snake.unshift(head);
 
 
-    // =================================
+    // ==========================
     // YEM YENDİ
-    // =================================
+    // ==========================
 
     if (
+        food &&
         head.x === food.x &&
-        head.y === food.y
+        head.y === food.y &&
+        eatingAnimation === 0
     ) {
 
         score += 10;
@@ -140,25 +161,68 @@ function update() {
         scoreText.textContent =
             "Skor: " + score;
 
-        // 👅 Dilini çıkar
-        tongueTimer = 8;
+
+        // Yenen yemi sakla
+        eatenFood = {
+            x: food.x,
+            y: food.y
+        };
+
+
+        // Yem geçici olarak kaldır
+        food = null;
+
+
+        // 👅 DİL ÇIKAR
         tonguePower = 1;
 
-        createFood();
+        tongueTimer = 8;
 
-    } else {
 
-        snake.pop();
+        // 🍒 YEME ANİMASYONU
+        eatingAnimation = 8;
+
+    }
+
+    else {
+
+        // Yem animasyonu sırasında
+        // yılan büyümeye devam etsin
+        if (eatingAnimation === 0) {
+
+            snake.pop();
+        }
     }
 
 
-    // Dil animasyonunu azalt
+    // ==========================
+    // DİL ZAMANI
+    // ==========================
+
     if (tongueTimer > 0) {
 
         tongueTimer--;
 
         if (tongueTimer <= 0) {
+
             tonguePower = 0;
+        }
+    }
+
+
+    // ==========================
+    // YEME ANİMASYONU
+    // ==========================
+
+    if (eatingAnimation > 0) {
+
+        eatingAnimation--;
+
+        if (eatingAnimation <= 0) {
+
+            eatenFood = null;
+
+            createFood();
         }
     }
 
@@ -167,11 +231,13 @@ function update() {
 }
 
 
-// =====================================
+// ==============================
 // ANA ÇİZİM
-// =====================================
+// ==============================
 
 function draw() {
+
+    // Arka plan
 
     ctx.fillStyle = "#101522";
 
@@ -184,9 +250,11 @@ function draw() {
 
 
     // Izgara
+
     ctx.strokeStyle = "#182131";
 
     ctx.lineWidth = 1;
+
 
     for (
         let x = 0;
@@ -232,17 +300,46 @@ function draw() {
 }
 
 
-// =====================================
+// ==============================
 // YEM
-// =====================================
+// ==============================
 
 function drawFood() {
 
+    let currentFood = food;
+
+
+    // Yenen yem animasyon sırasında
+    // eski yerinde görünmeye devam eder
+
+    if (!currentFood && eatenFood) {
+
+        currentFood = eatenFood;
+    }
+
+
+    if (!currentFood) {
+        return;
+    }
+
+
     const x =
-        food.x + grid / 2;
+        currentFood.x + grid / 2;
 
     const y =
-        food.y + grid / 2;
+        currentFood.y + grid / 2;
+
+
+    // Yeme animasyonunda küçülme
+
+    let size = 9;
+
+    if (eatingAnimation > 0) {
+
+        size =
+            9 *
+            (eatingAnimation / 8);
+    }
 
 
     const gradient =
@@ -280,7 +377,7 @@ function drawFood() {
     ctx.arc(
         x,
         y,
-        9,
+        size,
         0,
         Math.PI * 2
     );
@@ -288,9 +385,10 @@ function drawFood() {
     ctx.fill();
 
 
-    // Yem parlaması
+    // Parlama
+
     ctx.fillStyle =
-        "rgba(255,255,255,0.45)";
+        "rgba(255,255,255,0.55)";
 
 
     ctx.beginPath();
@@ -307,9 +405,9 @@ function drawFood() {
 }
 
 
-// =====================================
+// ==============================
 // YILAN
-// =====================================
+// ==============================
 
 function drawSnake() {
 
@@ -318,9 +416,9 @@ function drawSnake() {
     }
 
 
-    // =================================
-    // TEK PARÇA GÖVDE
-    // =================================
+    // ==========================
+    // GÖVDE
+    // ==========================
 
     const bodyGradient =
         ctx.createLinearGradient(
@@ -359,13 +457,13 @@ function drawSnake() {
     ctx.lineJoin = "round";
 
 
-    // Daha yumuşak gövde
     drawSmoothSnakePath();
 
     ctx.stroke();
 
 
-    // Gövde üst parlaklığı
+    // Gövde parlaklığı
+
     ctx.strokeStyle =
         "rgba(220,255,170,0.20)";
 
@@ -377,6 +475,7 @@ function drawSnake() {
 
 
     // Pullar
+
     ctx.strokeStyle =
         "rgba(220,255,170,0.30)";
 
@@ -415,17 +514,13 @@ function drawSnake() {
     ctx.restore();
 
 
-    // =================================
-    // BAŞ
-    // =================================
-
     drawSnakeHead();
 }
 
 
-// =====================================
-// YUMUŞAK GÖVDE
-// =====================================
+// ==============================
+// YUMUŞAK YILAN GÖVDESİ
+// ==============================
 
 function drawSmoothSnakePath() {
 
@@ -495,9 +590,9 @@ function drawSmoothSnakePath() {
 }
 
 
-// =====================================
+// ==============================
 // YILAN BAŞI
-// =====================================
+// ==============================
 
 function drawSnakeHead() {
 
@@ -543,6 +638,7 @@ function drawSnakeHead() {
 
 
     // Baş gölgesi
+
     ctx.fillStyle =
         "rgba(0,0,0,0.35)";
 
@@ -563,6 +659,7 @@ function drawSnakeHead() {
 
 
     // Baş
+
     const headGradient =
         ctx.createRadialGradient(
             -5,
@@ -609,9 +706,9 @@ function drawSnakeHead() {
     ctx.fill();
 
 
-    // =================================
+    // ==========================
     // GÖZLER
-    // =================================
+    // ==========================
 
     ctx.fillStyle =
         "#f4df55";
@@ -639,6 +736,7 @@ function drawSnakeHead() {
 
 
     // Göz bebekleri
+
     ctx.fillStyle = "#050505";
 
 
@@ -664,6 +762,7 @@ function drawSnakeHead() {
 
 
     // Burun delikleri
+
     ctx.fillStyle =
         "#102510";
 
@@ -689,15 +788,12 @@ function drawSnakeHead() {
     ctx.fill();
 
 
-    // =================================
-    // 👅 DİL
-    // SADECE YEME SIRASINDA
-    // =================================
+    // ==========================
+    // DİL
+    // SADECE YEME ANINDA
+    // ==========================
 
-    if (
-        tonguePower > 0 ||
-        isFoodInFront()
-    ) {
+    if (tonguePower > 0) {
 
         drawTongue();
     }
@@ -707,36 +803,20 @@ function drawSnakeHead() {
 }
 
 
-// =====================================
-// 👅 DİL ÇİZİMİ
-// =====================================
+// ==============================
+// DİL
+// ==============================
 
 function drawTongue() {
 
-    let length = 13;
-
-
-    // Yem yenirken dil uzar
-    if (tonguePower > 0) {
-
-        length = 25;
-    }
-
-
-    // Yem yakındaysa kısa dil
-    if (
-        tonguePower === 0 &&
-        isFoodInFront()
-    ) {
-
-        length = 17;
-    }
+    // Dil yeme sırasında çok belirgin
+    const length = 32;
 
 
     ctx.strokeStyle =
-        "#ff3158";
+        "#ff174f";
 
-    ctx.lineWidth = 1.8;
+    ctx.lineWidth = 2;
 
     ctx.lineCap = "round";
 
@@ -745,6 +825,7 @@ function drawTongue() {
 
 
     // Ana dil
+
     ctx.moveTo(
         13,
         0
@@ -757,28 +838,29 @@ function drawTongue() {
     );
 
 
-    // Çatallar
-    ctx.moveTo(
-        length,
-        0
-    );
-
-
-    ctx.lineTo(
-        length + 5,
-        -3
-    );
-
+    // Üst çatal
 
     ctx.moveTo(
         length,
         0
     );
 
+    ctx.lineTo(
+        length + 7,
+        -4
+    );
+
+
+    // Alt çatal
+
+    ctx.moveTo(
+        length,
+        0
+    );
 
     ctx.lineTo(
-        length + 5,
-        3
+        length + 7,
+        4
     );
 
 
@@ -786,82 +868,9 @@ function drawTongue() {
 }
 
 
-// =====================================
-// YEM ÖNDE Mİ?
-// =====================================
-
-function isFoodInFront() {
-
-    if (!food) {
-        return false;
-    }
-
-
-    const head = snake[0];
-
-
-    const dx =
-        food.x - head.x;
-
-    const dy =
-        food.y - head.y;
-
-
-    // Sağa
-    if (
-        direction.x > 0 &&
-        dx > 0 &&
-        dx <= 60 &&
-        Math.abs(dy) <= 20
-    ) {
-
-        return true;
-    }
-
-
-    // Sola
-    if (
-        direction.x < 0 &&
-        dx < 0 &&
-        dx >= -60 &&
-        Math.abs(dy) <= 20
-    ) {
-
-        return true;
-    }
-
-
-    // Aşağı
-    if (
-        direction.y > 0 &&
-        dy > 0 &&
-        dy <= 60 &&
-        Math.abs(dx) <= 20
-    ) {
-
-        return true;
-    }
-
-
-    // Yukarı
-    if (
-        direction.y < 0 &&
-        dy < 0 &&
-        dy >= -60 &&
-        Math.abs(dx) <= 20
-    ) {
-
-        return true;
-    }
-
-
-    return false;
-}
-
-
-// =====================================
-// YEM OLUŞTUR
-// =====================================
+// ==============================
+// YENİ YEM
+// ==============================
 
 function createFood() {
 
@@ -896,9 +905,9 @@ function createFood() {
 }
 
 
-// =====================================
+// ==============================
 // OYUN BİTTİ
-// =====================================
+// ==============================
 
 function endGame() {
 
@@ -921,9 +930,9 @@ function endGame() {
 }
 
 
-// =====================================
-// KLAVYE
-// =====================================
+// ==============================
+// KLAVYE KONTROLÜ
+// ==============================
 
 document.addEventListener(
     "keydown",
@@ -984,9 +993,9 @@ document.addEventListener(
 );
 
 
-// =====================================
-// 📱 TELEFON KAYDIRMA
-// =====================================
+// ==============================
+// TELEFON KAYDIRMA
+// ==============================
 
 let touchStartX = 0;
 let touchStartY = 0;
@@ -998,6 +1007,7 @@ canvas.addEventListener(
 
         const touch =
             event.touches[0];
+
 
         touchStartX =
             touch.clientX;
@@ -1044,7 +1054,8 @@ canvas.addEventListener(
         }
 
 
-        // Yatay
+        // YATAY
+
         if (
             Math.abs(dx) >
             Math.abs(dy)
@@ -1073,9 +1084,11 @@ canvas.addEventListener(
                 };
             }
 
+
         }
 
-        // Dikey
+        // DİKEY
+
         else {
 
             if (
@@ -1109,9 +1122,9 @@ canvas.addEventListener(
 );
 
 
-// =====================================
+// ==============================
 // OYNA BUTONU
-// =====================================
+// ==============================
 
 startButton.addEventListener(
     "click",
