@@ -206,3 +206,57 @@ document.addEventListener("keydown", event => {
 });
 
 startButton.addEventListener("click", startGame);
+
+// 📱 Dokunmatik kontrol
+let touchStartX = 0;
+let touchStartY = 0;
+
+canvas.addEventListener("touchstart", (event) => {
+    const touch = event.touches[0];
+
+    touchStartX = touch.clientX;
+    touchStartY = touch.clientY;
+});
+
+canvas.addEventListener("touchend", (event) => {
+    if (!gameRunning) return;
+
+    const touch = event.changedTouches[0];
+
+    const touchEndX = touch.clientX;
+    const touchEndY = touch.clientY;
+
+    const dx = touchEndX - touchStartX;
+    const dy = touchEndY - touchStartY;
+
+    // Çok küçük hareketleri yok say
+    if (Math.abs(dx) < 20 && Math.abs(dy) < 20) {
+        return;
+    }
+
+    // Yatay hareket
+    if (Math.abs(dx) > Math.abs(dy)) {
+
+        if (dx > 0 && direction.x === 0) {
+            nextDirection = { x: grid, y: 0 };
+        }
+
+        if (dx < 0 && direction.x === 0) {
+            nextDirection = { x: -grid, y: 0 };
+        }
+
+    }
+
+    // Dikey hareket
+    else {
+
+        if (dy > 0 && direction.y === 0) {
+            nextDirection = { x: 0, y: grid };
+        }
+
+        if (dy < 0 && direction.y === 0) {
+            nextDirection = { x: 0, y: -grid };
+        }
+
+    }
+});
