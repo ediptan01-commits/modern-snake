@@ -5,6 +5,7 @@ const startButton = document.getElementById("startButton");
 const canvas = document.createElement("canvas");
 canvas.width = 400;
 canvas.height = 400;
+
 game.appendChild(canvas);
 
 const ctx = canvas.getContext("2d");
@@ -26,6 +27,14 @@ let coins = Number(
     localStorage.getItem("modernSnakeCoins") || 0
 );
 
+let selectedSnake =
+    localStorage.getItem("selectedSnake") || "python";
+
+let ownedSnakes = JSON.parse(
+    localStorage.getItem("ownedSnakes") ||
+    '["python"]'
+);
+
 let tongueTimer = 0;
 let tonguePower = 0;
 
@@ -34,16 +43,79 @@ let eatenFood = null;
 
 
 // =====================================
+// YILANLAR
+// =====================================
+
+const snakes = {
+
+    python: {
+        name: "Piton",
+        price: 0,
+        color: "brown"
+    },
+
+    cobra: {
+        name: "Kobra",
+        price: 50,
+        color: "cobra"
+    },
+
+    anaconda: {
+        name: "Anakonda",
+        price: 100,
+        color: "anaconda"
+    },
+
+    kingcobra: {
+        name: "Kral Kobra",
+        price: 150,
+        color: "kingcobra"
+    },
+
+    albino: {
+        name: "Albino Piton",
+        price: 200,
+        color: "albino"
+    }
+};
+
+
+// =====================================
+// KAYDET
+// =====================================
+
+function saveSnakeData() {
+
+    localStorage.setItem(
+        "selectedSnake",
+        selectedSnake
+    );
+
+    localStorage.setItem(
+        "ownedSnakes",
+        JSON.stringify(ownedSnakes)
+    );
+
+    localStorage.setItem(
+        "modernSnakeCoins",
+        coins
+    );
+}
+
+
+// =====================================
 // COIN SAYACI
 // =====================================
 
 function drawCoinCounter() {
 
-    let counter = document.getElementById("coinCounter");
+    let counter =
+        document.getElementById("coinCounter");
 
     if (!counter) {
 
         counter = document.createElement("div");
+
         counter.id = "coinCounter";
 
         counter.style.fontSize = "20px";
@@ -58,18 +130,320 @@ function drawCoinCounter() {
         );
     }
 
-    counter.textContent = "🪙 " + coins;
+    counter.textContent =
+        "🪙 " + coins;
 }
 
 
-function saveCoins() {
+// =====================================
+// YILAN MENÜSÜ
+// =====================================
 
-    localStorage.setItem(
-        "modernSnakeCoins",
-        coins
+function createSnakeMenu() {
+
+    let old =
+        document.getElementById("snakeMenu");
+
+    if (old) {
+        old.remove();
+    }
+
+
+    const menu =
+        document.createElement("div");
+
+    menu.id = "snakeMenu";
+
+    menu.style.margin =
+        "15px auto";
+
+    menu.style.maxWidth =
+        "400px";
+
+    menu.style.padding =
+        "15px";
+
+    menu.style.borderRadius =
+        "20px";
+
+    menu.style.background =
+        "#111827";
+
+    menu.style.border =
+        "1px solid #263449";
+
+    menu.style.boxShadow =
+        "0 10px 30px rgba(0,0,0,.35)";
+
+
+    const title =
+        document.createElement("div");
+
+    title.textContent =
+        "🐍 YILANLAR";
+
+    title.style.color =
+        "#ffffff";
+
+    title.style.fontSize =
+        "22px";
+
+    title.style.fontWeight =
+        "bold";
+
+    title.style.textAlign =
+        "center";
+
+    title.style.marginBottom =
+        "12px";
+
+    menu.appendChild(title);
+
+
+    Object.keys(snakes).forEach(
+        id => {
+
+            const snakeData =
+                snakes[id];
+
+            const button =
+                document.createElement("button");
+
+            const owned =
+                ownedSnakes.includes(id);
+
+            const selected =
+                selectedSnake === id;
+
+
+            if (selected) {
+
+                button.textContent =
+                    "✓ " +
+                    snakeData.name +
+                    "  • SEÇİLİ";
+
+            } else if (owned) {
+
+                button.textContent =
+                    "🐍 " +
+                    snakeData.name +
+                    "  • SEÇ";
+
+            } else {
+
+                button.textContent =
+                    "🔒 " +
+                    snakeData.name +
+                    "  • " +
+                    snakeData.price +
+                    " 🪙";
+            }
+
+
+            button.style.display =
+                "block";
+
+            button.style.width =
+                "100%";
+
+            button.style.margin =
+                "8px 0";
+
+            button.style.padding =
+                "13px";
+
+            button.style.border =
+                "none";
+
+            button.style.borderRadius =
+                "12px";
+
+            button.style.fontSize =
+                "16px";
+
+            button.style.fontWeight =
+                "bold";
+
+            button.style.cursor =
+                "pointer";
+
+            button.style.background =
+                selected
+                    ? "#00d9ff"
+                    : "#243044";
+
+            button.style.color =
+                selected
+                    ? "#061018"
+                    : "#ffffff";
+
+
+            button.onclick =
+                function () {
+
+                    // Zaten sahip
+                    if (
+                        ownedSnakes.includes(id)
+                    ) {
+
+                        selectedSnake = id;
+
+                        saveSnakeData();
+
+                        createSnakeMenu();
+
+                        return;
+                    }
+
+
+                    // Satın alma
+                    if (
+                        coins >=
+                        snakeData.price
+                    ) {
+
+                        coins -=
+                            snakeData.price;
+
+                        ownedSnakes.push(id);
+
+                        selectedSnake = id;
+
+                        saveSnakeData();
+
+                        drawCoinCounter();
+
+                        createSnakeMenu();
+
+                    } else {
+
+                        alert(
+                            "Bu yılanı almak için " +
+                            snakeData.price +
+                            " coin gerekiyor."
+                        );
+                    }
+                };
+
+
+            menu.appendChild(button);
+        }
     );
 
-    drawCoinCounter();
+
+    const close =
+        document.createElement("button");
+
+    close.textContent =
+        "KAPAT";
+
+    close.style.display =
+        "block";
+
+    close.style.width =
+        "100%";
+
+    close.style.marginTop =
+        "12px";
+
+    close.style.padding =
+        "12px";
+
+    close.style.border =
+        "none";
+
+    close.style.borderRadius =
+        "12px";
+
+    close.style.background =
+        "#ff3158";
+
+    close.style.color =
+        "#ffffff";
+
+    close.style.fontWeight =
+        "bold";
+
+    close.onclick =
+        function () {
+
+            menu.remove();
+        };
+
+
+    menu.appendChild(close);
+
+    document.body.insertBefore(
+        menu,
+        game.parentElement
+    );
+}
+
+
+// =====================================
+// YILANLAR BUTONU
+// =====================================
+
+function createSnakeButton() {
+
+    let button =
+        document.getElementById(
+            "snakesButton"
+        );
+
+    if (button) {
+        return;
+    }
+
+
+    button =
+        document.createElement("button");
+
+    button.id =
+        "snakesButton";
+
+    button.textContent =
+        "🐍 YILANLAR";
+
+    button.style.display =
+        "block";
+
+    button.style.margin =
+        "10px auto";
+
+    button.style.padding =
+        "12px 30px";
+
+    button.style.border =
+        "none";
+
+    button.style.borderRadius =
+        "15px";
+
+    button.style.background =
+        "#243044";
+
+    button.style.color =
+        "#ffffff";
+
+    button.style.fontSize =
+        "17px";
+
+    button.style.fontWeight =
+        "bold";
+
+
+    button.onclick =
+        function () {
+
+            createSnakeMenu();
+        };
+
+
+    startButton.parentElement.appendChild(
+        button
+    );
 }
 
 
@@ -87,15 +461,18 @@ function startGame() {
         { x: 120, y: 200 }
     ];
 
+
     direction = {
         x: grid,
         y: 0
     };
 
+
     nextDirection = {
         x: grid,
         y: 0
     };
+
 
     score = 0;
 
@@ -105,24 +482,34 @@ function startGame() {
     eatingAnimation = 0;
     eatenFood = null;
 
-    scoreText.textContent = "Skor: 0";
+
+    scoreText.textContent =
+        "Skor: 0";
+
 
     createFood();
     createCoin();
 
+
     gameRunning = true;
+
 
     startButton.textContent =
         "YENİDEN BAŞLAT";
 
+
     clearInterval(gameLoop);
 
-    gameLoop = setInterval(
-        update,
-        120
-    );
+
+    gameLoop =
+        setInterval(
+            update,
+            120
+        );
+
 
     draw();
+
     drawCoinCounter();
 }
 
@@ -137,11 +524,20 @@ function update() {
         return;
     }
 
-    direction = nextDirection;
+
+    direction =
+        nextDirection;
+
 
     const head = {
-        x: snake[0].x + direction.x,
-        y: snake[0].y + direction.y
+
+        x:
+            snake[0].x +
+            direction.x,
+
+        y:
+            snake[0].y +
+            direction.y
     };
 
 
@@ -155,6 +551,7 @@ function update() {
     ) {
 
         endGame();
+
         return;
     }
 
@@ -170,6 +567,7 @@ function update() {
     ) {
 
         endGame();
+
         return;
     }
 
@@ -190,24 +588,34 @@ function update() {
 
         score += 10;
 
+
         scoreText.textContent =
             "Skor: " + score;
 
+
         eatenFood = {
+
             x: food.x,
+
             y: food.y
         };
 
+
         food = null;
 
+
         tonguePower = 1;
+
         tongueTimer = 8;
 
         eatingAnimation = 8;
 
     } else {
 
-        if (eatingAnimation === 0) {
+        if (
+            eatingAnimation === 0
+        ) {
+
             snake.pop();
         }
     }
@@ -225,7 +633,9 @@ function update() {
 
         coins++;
 
-        saveCoins();
+        saveSnakeData();
+
+        drawCoinCounter();
 
         createCoin();
     }
@@ -235,11 +645,16 @@ function update() {
     // DİL
     // =================================
 
-    if (tongueTimer > 0) {
+    if (
+        tongueTimer > 0
+    ) {
 
         tongueTimer--;
 
-        if (tongueTimer <= 0) {
+        if (
+            tongueTimer <= 0
+        ) {
+
             tonguePower = 0;
         }
     }
@@ -249,11 +664,16 @@ function update() {
     // YEM ANİMASYONU
     // =================================
 
-    if (eatingAnimation > 0) {
+    if (
+        eatingAnimation > 0
+    ) {
 
         eatingAnimation--;
 
-        if (eatingAnimation <= 0) {
+
+        if (
+            eatingAnimation <= 0
+        ) {
 
             eatenFood = null;
 
@@ -272,7 +692,9 @@ function update() {
 
 function draw() {
 
-    ctx.fillStyle = "#101522";
+    ctx.fillStyle =
+        "#101522";
+
 
     ctx.fillRect(
         0,
@@ -284,8 +706,11 @@ function draw() {
 
     // IZGARA
 
-    ctx.strokeStyle = "#182131";
+    ctx.strokeStyle =
+        "#182131";
+
     ctx.lineWidth = 1;
+
 
     for (
         let x = 0;
@@ -294,10 +719,20 @@ function draw() {
     ) {
 
         ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, canvas.height);
+
+        ctx.moveTo(
+            x,
+            0
+        );
+
+        ctx.lineTo(
+            x,
+            canvas.height
+        );
+
         ctx.stroke();
     }
+
 
     for (
         let y = 0;
@@ -306,14 +741,25 @@ function draw() {
     ) {
 
         ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(canvas.width, y);
+
+        ctx.moveTo(
+            0,
+            y
+        );
+
+        ctx.lineTo(
+            canvas.width,
+            y
+        );
+
         ctx.stroke();
     }
 
 
     drawFood();
+
     drawCoin();
+
     drawSnake();
 }
 
@@ -324,34 +770,50 @@ function draw() {
 
 function drawFood() {
 
-    let currentFood = food;
+    let currentFood =
+        food;
+
 
     if (
         !currentFood &&
         eatenFood
     ) {
 
-        currentFood = eatenFood;
+        currentFood =
+            eatenFood;
     }
+
 
     if (!currentFood) {
         return;
     }
 
+
     const x =
-        currentFood.x + grid / 2;
+        currentFood.x +
+        grid / 2;
+
 
     const y =
-        currentFood.y + grid / 2;
+        currentFood.y +
+        grid / 2;
+
 
     let size = 9;
 
-    if (eatingAnimation > 0) {
+
+    if (
+        eatingAnimation > 0
+    ) {
 
         size =
             9 *
-            (eatingAnimation / 8);
+            (
+                eatingAnimation /
+                8
+            );
     }
+
 
     const gradient =
         ctx.createRadialGradient(
@@ -363,24 +825,31 @@ function drawFood() {
             11
         );
 
+
     gradient.addColorStop(
         0,
         "#ffb5c5"
     );
+
 
     gradient.addColorStop(
         0.5,
         "#ff3d71"
     );
 
+
     gradient.addColorStop(
         1,
         "#861333"
     );
 
-    ctx.fillStyle = gradient;
+
+    ctx.fillStyle =
+        gradient;
+
 
     ctx.beginPath();
+
 
     ctx.arc(
         x,
@@ -389,6 +858,7 @@ function drawFood() {
         0,
         Math.PI * 2
     );
+
 
     ctx.fill();
 }
@@ -404,14 +874,23 @@ function drawCoin() {
         return;
     }
 
+
     const x =
-        coin.x + grid / 2;
+        coin.x +
+        grid / 2;
+
 
     const y =
-        coin.y + grid / 2;
+        coin.y +
+        grid / 2;
 
-    ctx.shadowColor = "#ffd54a";
-    ctx.shadowBlur = 12;
+
+    ctx.shadowColor =
+        "#ffd54a";
+
+    ctx.shadowBlur =
+        12;
+
 
     const gradient =
         ctx.createRadialGradient(
@@ -423,24 +902,31 @@ function drawCoin() {
             10
         );
 
+
     gradient.addColorStop(
         0,
         "#fff6a0"
     );
+
 
     gradient.addColorStop(
         0.45,
         "#ffd54a"
     );
 
+
     gradient.addColorStop(
         1,
         "#c88700"
     );
 
-    ctx.fillStyle = gradient;
+
+    ctx.fillStyle =
+        gradient;
+
 
     ctx.beginPath();
+
 
     ctx.arc(
         x,
@@ -450,17 +936,29 @@ function drawCoin() {
         Math.PI * 2
     );
 
+
     ctx.fill();
 
-    ctx.shadowBlur = 0;
 
-    ctx.fillStyle = "#8a5c00";
+    ctx.shadowBlur =
+        0;
+
+
+    ctx.fillStyle =
+        "#8a5c00";
+
 
     ctx.font =
         "bold 11px Arial";
 
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
+
+    ctx.textAlign =
+        "center";
+
+
+    ctx.textBaseline =
+        "middle";
+
 
     ctx.fillText(
         "$",
@@ -471,19 +969,98 @@ function drawCoin() {
 
 
 // =====================================
-// 🐍 PITON GÖVDESİ
+// YILAN
 // =====================================
 
 function drawSnake() {
 
-    if (snake.length === 0) {
+    if (
+        snake.length === 0
+    ) {
         return;
     }
 
 
-    // Ana piton rengi
+    const style =
+        snakes[selectedSnake];
 
-    const bodyGradient =
+
+    let bodyColors;
+
+
+    if (
+        style.color ===
+        "brown"
+    ) {
+
+        bodyColors =
+            [
+                "#d6a75b",
+                "#a8753f",
+                "#70472c",
+                "#3d281d"
+            ];
+    }
+
+
+    else if (
+        style.color ===
+        "cobra"
+    ) {
+
+        bodyColors =
+            [
+                "#6f8f55",
+                "#3f6034",
+                "#263b24",
+                "#182719"
+            ];
+    }
+
+
+    else if (
+        style.color ===
+        "anaconda"
+    ) {
+
+        bodyColors =
+            [
+                "#657047",
+                "#39462d",
+                "#20291c",
+                "#11170f"
+            ];
+    }
+
+
+    else if (
+        style.color ===
+        "kingcobra"
+    ) {
+
+        bodyColors =
+            [
+                "#c9a85d",
+                "#8b6a32",
+                "#49391d",
+                "#211b10"
+            ];
+    }
+
+
+    else {
+
+        bodyColors =
+            [
+                "#fff4c4",
+                "#e9d48a",
+                "#c5a85e",
+                "#8d743e"
+            ];
+    }
+
+
+    const gradient =
         ctx.createLinearGradient(
             0,
             0,
@@ -491,57 +1068,76 @@ function drawSnake() {
             canvas.height
         );
 
-    bodyGradient.addColorStop(
+
+    gradient.addColorStop(
         0,
-        "#d6a75b"
+        bodyColors[0]
     );
 
-    bodyGradient.addColorStop(
+
+    gradient.addColorStop(
         0.35,
-        "#a8753f"
+        bodyColors[1]
     );
 
-    bodyGradient.addColorStop(
+
+    gradient.addColorStop(
         0.7,
-        "#70472c"
+        bodyColors[2]
     );
 
-    bodyGradient.addColorStop(
+
+    gradient.addColorStop(
         1,
-        "#3d281d"
+        bodyColors[3]
     );
 
 
     ctx.save();
 
+
     ctx.strokeStyle =
-        bodyGradient;
+        gradient;
 
-    ctx.lineWidth = 19;
 
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
+    ctx.lineWidth =
+        selectedSnake ===
+        "anaconda"
+            ? 22
+            : 19;
+
+
+    ctx.lineCap =
+        "round";
+
+
+    ctx.lineJoin =
+        "round";
+
 
     drawSmoothSnakePath();
+
 
     ctx.stroke();
 
 
-    // Açık renkli sırt şeridi
+    // PARLAKLIK
 
     ctx.strokeStyle =
-        "rgba(232,190,112,0.55)";
+        "rgba(255,230,170,0.30)";
 
-    ctx.lineWidth = 4;
+
+    ctx.lineWidth =
+        4;
+
 
     drawSmoothSnakePath();
+
 
     ctx.stroke();
 
 
-    // =================================
-    // PITON DESENLERİ
-    // =================================
+    // DESENLER
 
     for (
         let i = 1;
@@ -553,64 +1149,68 @@ function drawSnake() {
             snake[i].x +
             grid / 2;
 
+
         const y =
             snake[i].y +
             grid / 2;
 
 
-        // Büyük koyu benek
+        if (
+            selectedSnake ===
+            "python"
+        ) {
 
-        ctx.fillStyle =
-            "rgba(45,25,15,0.72)";
-
-        ctx.beginPath();
-
-        ctx.ellipse(
-            x,
-            y,
-            6,
-            4,
-            Math.PI / 4,
-            0,
-            Math.PI * 2
-        );
-
-        ctx.fill();
+            drawPythonPattern(
+                x,
+                y
+            );
+        }
 
 
-        // Benek içi
+        else if (
+            selectedSnake ===
+            "anaconda"
+        ) {
 
-        ctx.strokeStyle =
-            "rgba(235,190,105,0.55)";
+            drawAnacondaPattern(
+                x,
+                y
+            );
+        }
 
-        ctx.lineWidth = 1;
 
-        ctx.beginPath();
+        else if (
+            selectedSnake ===
+            "cobra"
+        ) {
 
-        ctx.ellipse(
-            x,
-            y,
-            4,
-            2.5,
-            Math.PI / 4,
-            0,
-            Math.PI * 2
-        );
+            drawCobraPattern(
+                x,
+                y
+            );
+        }
 
-        ctx.stroke();
+
+        else if (
+            selectedSnake ===
+            "kingcobra"
+        ) {
+
+            drawKingCobraPattern(
+                x,
+                y
+            );
+        }
+
+
+        else {
+
+            drawAlbinoPattern(
+                x,
+                y
+            );
+        }
     }
-
-
-    // Alt gövde gölgeleri
-
-    ctx.strokeStyle =
-        "rgba(30,18,12,0.35)";
-
-    ctx.lineWidth = 3;
-
-    drawSmoothSnakePath();
-
-    ctx.stroke();
 
 
     ctx.restore();
@@ -621,48 +1221,238 @@ function drawSnake() {
 
 
 // =====================================
+// PITON DESENİ
+// =====================================
+
+function drawPythonPattern(
+    x,
+    y
+) {
+
+    ctx.fillStyle =
+        "rgba(45,25,15,.72)";
+
+
+    ctx.beginPath();
+
+
+    ctx.ellipse(
+        x,
+        y,
+        6,
+        4,
+        Math.PI / 4,
+        0,
+        Math.PI * 2
+    );
+
+
+    ctx.fill();
+}
+
+
+// =====================================
+// ANAKONDA DESENİ
+// =====================================
+
+function drawAnacondaPattern(
+    x,
+    y
+) {
+
+    ctx.fillStyle =
+        "rgba(20,30,14,.8)";
+
+
+    ctx.beginPath();
+
+
+    ctx.ellipse(
+        x,
+        y,
+        7,
+        4,
+        0,
+        0,
+        Math.PI * 2
+    );
+
+
+    ctx.fill();
+}
+
+
+// =====================================
+// KOBRA DESENİ
+// =====================================
+
+function drawCobraPattern(
+    x,
+    y
+) {
+
+    ctx.strokeStyle =
+        "rgba(210,230,160,.45)";
+
+
+    ctx.lineWidth =
+        2;
+
+
+    ctx.beginPath();
+
+
+    ctx.moveTo(
+        x - 6,
+        y
+    );
+
+
+    ctx.lineTo(
+        x + 6,
+        y
+    );
+
+
+    ctx.stroke();
+}
+
+
+// =====================================
+// KRAL KOBRA
+// =====================================
+
+function drawKingCobraPattern(
+    x,
+    y
+) {
+
+    ctx.strokeStyle =
+        "rgba(25,20,10,.75)";
+
+
+    ctx.lineWidth =
+        2;
+
+
+    ctx.beginPath();
+
+
+    ctx.moveTo(
+        x - 5,
+        y - 3
+    );
+
+
+    ctx.lineTo(
+        x + 5,
+        y + 3
+    );
+
+
+    ctx.stroke();
+}
+
+
+// =====================================
+// ALBİNO
+// =====================================
+
+function drawAlbinoPattern(
+    x,
+    y
+) {
+
+    ctx.fillStyle =
+        "rgba(180,80,60,.55)";
+
+
+    ctx.beginPath();
+
+
+    ctx.arc(
+        x,
+        y,
+        3,
+        0,
+        Math.PI * 2
+    );
+
+
+    ctx.fill();
+}
+
+
+// =====================================
 // YUMUŞAK GÖVDE
 // =====================================
 
 function drawSmoothSnakePath() {
 
-    if (snake.length < 2) {
+    if (
+        snake.length < 2
+    ) {
         return;
     }
 
+
     const points =
-        snake.map(part => ({
-            x: part.x + grid / 2,
-            y: part.y + grid / 2
-        }));
+        snake.map(
+            part => ({
+                x:
+                    part.x +
+                    grid / 2,
+
+                y:
+                    part.y +
+                    grid / 2
+            })
+        );
 
 
     ctx.beginPath();
 
+
     ctx.moveTo(
-        points[points.length - 1].x,
-        points[points.length - 1].y
+        points[
+            points.length - 1
+        ].x,
+
+        points[
+            points.length - 1
+        ].y
     );
 
 
     for (
-        let i = points.length - 1;
+        let i =
+            points.length - 1;
+
         i > 0;
+
         i--
     ) {
 
         const current =
             points[i];
 
+
         const next =
             points[i - 1];
 
 
         const midX =
-            (current.x + next.x) / 2;
+            (
+                current.x +
+                next.x
+            ) / 2;
+
 
         const midY =
-            (current.y + next.y) / 2;
+            (
+                current.y +
+                next.y
+            ) / 2;
 
 
         ctx.quadraticCurveTo(
@@ -676,6 +1466,7 @@ function drawSmoothSnakePath() {
 
     const first =
         points[0];
+
 
     const second =
         points[1];
@@ -691,21 +1482,27 @@ function drawSmoothSnakePath() {
 
 
 // =====================================
-// 🐍 PITON BAŞI
+// YILAN BAŞI
 // =====================================
 
 function drawSnakeHead() {
 
-    const head = snake[0];
+    const head =
+        snake[0];
+
 
     const headX =
-        head.x + grid / 2;
+        head.x +
+        grid / 2;
+
 
     const headY =
-        head.y + grid / 2;
+        head.y +
+        grid / 2;
 
 
     ctx.save();
+
 
     ctx.translate(
         headX,
@@ -715,31 +1512,86 @@ function drawSnakeHead() {
 
     let angle = 0;
 
-    if (direction.x > 0) {
+
+    if (
+        direction.x > 0
+    ) {
         angle = 0;
     }
 
-    if (direction.x < 0) {
+
+    if (
+        direction.x < 0
+    ) {
         angle = Math.PI;
     }
 
-    if (direction.y < 0) {
-        angle = -Math.PI / 2;
+
+    if (
+        direction.y < 0
+    ) {
+        angle =
+            -Math.PI / 2;
     }
 
-    if (direction.y > 0) {
-        angle = Math.PI / 2;
+
+    if (
+        direction.y > 0
+    ) {
+        angle =
+            Math.PI / 2;
     }
+
 
     ctx.rotate(angle);
 
 
-    // Baş gölgesi
+    const style =
+        snakes[selectedSnake];
+
+
+    // KOBRA BAŞLIĞI
+
+    if (
+        selectedSnake ===
+        "cobra" ||
+        selectedSnake ===
+        "kingcobra"
+    ) {
+
+        ctx.fillStyle =
+            selectedSnake ===
+            "cobra"
+                ? "#526b3e"
+                : "#725b2b";
+
+
+        ctx.beginPath();
+
+
+        ctx.ellipse(
+            -4,
+            0,
+            25,
+            18,
+            0,
+            0,
+            Math.PI * 2
+        );
+
+
+        ctx.fill();
+    }
+
+
+    // GÖLGE
 
     ctx.fillStyle =
-        "rgba(0,0,0,0.45)";
+        "rgba(0,0,0,.4)";
+
 
     ctx.beginPath();
+
 
     ctx.ellipse(
         2,
@@ -751,10 +1603,11 @@ function drawSnakeHead() {
         Math.PI * 2
     );
 
+
     ctx.fill();
 
 
-    // Piton kafa rengi
+    // BAŞ GRADIENT
 
     const headGradient =
         ctx.createRadialGradient(
@@ -766,20 +1619,112 @@ function drawSnakeHead() {
             20
         );
 
-    headGradient.addColorStop(
-        0,
-        "#e0b86e"
-    );
 
-    headGradient.addColorStop(
-        0.45,
-        "#a97842"
-    );
+    if (
+        style.color ===
+        "brown"
+    ) {
 
-    headGradient.addColorStop(
-        1,
-        "#4b3021"
-    );
+        headGradient.addColorStop(
+            0,
+            "#e0b86e"
+        );
+
+        headGradient.addColorStop(
+            .45,
+            "#a97842"
+        );
+
+        headGradient.addColorStop(
+            1,
+            "#4b3021"
+        );
+    }
+
+
+    else if (
+        style.color ===
+        "cobra"
+    ) {
+
+        headGradient.addColorStop(
+            0,
+            "#9bbd75"
+        );
+
+        headGradient.addColorStop(
+            .5,
+            "#527342"
+        );
+
+        headGradient.addColorStop(
+            1,
+            "#20311d"
+        );
+    }
+
+
+    else if (
+        style.color ===
+        "anaconda"
+    ) {
+
+        headGradient.addColorStop(
+            0,
+            "#81905c"
+        );
+
+        headGradient.addColorStop(
+            .5,
+            "#4c5c36"
+        );
+
+        headGradient.addColorStop(
+            1,
+            "#20291a"
+        );
+    }
+
+
+    else if (
+        style.color ===
+        "kingcobra"
+    ) {
+
+        headGradient.addColorStop(
+            0,
+            "#d7bd73"
+        );
+
+        headGradient.addColorStop(
+            .5,
+            "#8e7138"
+        );
+
+        headGradient.addColorStop(
+            1,
+            "#302511"
+        );
+    }
+
+
+    else {
+
+        headGradient.addColorStop(
+            0,
+            "#fff7d4"
+        );
+
+        headGradient.addColorStop(
+            .5,
+            "#e8d38d"
+        );
+
+        headGradient.addColorStop(
+            1,
+            "#a18a50"
+        );
+    }
 
 
     ctx.fillStyle =
@@ -787,6 +1732,7 @@ function drawSnakeHead() {
 
 
     ctx.beginPath();
+
 
     ctx.ellipse(
         0,
@@ -798,62 +1744,21 @@ function drawSnakeHead() {
         Math.PI * 2
     );
 
+
     ctx.fill();
 
 
-    // =================================
-    // BAŞ DESENİ
-    // =================================
-
-    ctx.strokeStyle =
-        "rgba(45,24,14,0.75)";
-
-    ctx.lineWidth = 2;
-
-
-    ctx.beginPath();
-
-    ctx.moveTo(
-        -8,
-        -9
-    );
-
-    ctx.quadraticCurveTo(
-        0,
-        -3,
-        8,
-        -8
-    );
-
-    ctx.stroke();
-
-
-    ctx.beginPath();
-
-    ctx.moveTo(
-        -8,
-        9
-    );
-
-    ctx.quadraticCurveTo(
-        0,
-        3,
-        8,
-        8
-    );
-
-    ctx.stroke();
-
-
-    // =================================
     // GÖZLER
-    // =================================
 
     ctx.fillStyle =
-        "#d9b62e";
+        selectedSnake ===
+        "albino"
+            ? "#d85b68"
+            : "#d9b62e";
 
 
     ctx.beginPath();
+
 
     ctx.arc(
         8,
@@ -863,6 +1768,7 @@ function drawSnakeHead() {
         Math.PI * 2
     );
 
+
     ctx.arc(
         8,
         7,
@@ -871,10 +1777,11 @@ function drawSnakeHead() {
         Math.PI * 2
     );
 
+
     ctx.fill();
 
 
-    // Siyah dikey göz bebekleri
+    // GÖZ BEBEKLERİ
 
     ctx.fillStyle =
         "#080604";
@@ -882,6 +1789,7 @@ function drawSnakeHead() {
 
     ctx.beginPath();
 
+
     ctx.ellipse(
         9,
         -7,
@@ -891,6 +1799,7 @@ function drawSnakeHead() {
         0,
         Math.PI * 2
     );
+
 
     ctx.ellipse(
         9,
@@ -902,16 +1811,18 @@ function drawSnakeHead() {
         Math.PI * 2
     );
 
+
     ctx.fill();
 
 
-    // Burun delikleri
+    // BURUN
 
     ctx.fillStyle =
         "#24150e";
 
 
     ctx.beginPath();
+
 
     ctx.arc(
         14,
@@ -921,6 +1832,7 @@ function drawSnakeHead() {
         Math.PI * 2
     );
 
+
     ctx.arc(
         14,
         3,
@@ -929,14 +1841,16 @@ function drawSnakeHead() {
         Math.PI * 2
     );
 
+
     ctx.fill();
 
 
-    // =================================
     // DİL
-    // =================================
 
-    if (tonguePower > 0) {
+    if (
+        tonguePower > 0
+    ) {
+
         drawTongue();
     }
 
@@ -946,27 +1860,34 @@ function drawSnakeHead() {
 
 
 // =====================================
-// 👅 DİL
+// DİL
 // =====================================
 
 function drawTongue() {
 
     const length = 32;
 
+
     ctx.strokeStyle =
         "#e51f45";
 
-    ctx.lineWidth = 2;
 
-    ctx.lineCap = "round";
+    ctx.lineWidth =
+        2;
+
+
+    ctx.lineCap =
+        "round";
 
 
     ctx.beginPath();
+
 
     ctx.moveTo(
         15,
         0
     );
+
 
     ctx.lineTo(
         length,
@@ -974,12 +1895,11 @@ function drawTongue() {
     );
 
 
-    // Üst çatal
-
     ctx.moveTo(
         length,
         0
     );
+
 
     ctx.lineTo(
         length + 8,
@@ -987,17 +1907,17 @@ function drawTongue() {
     );
 
 
-    // Alt çatal
-
     ctx.moveTo(
         length,
         0
     );
 
+
     ctx.lineTo(
         length + 8,
         4
     );
+
 
     ctx.stroke();
 }
@@ -1010,6 +1930,7 @@ function drawTongue() {
 function createFood() {
 
     let valid = false;
+
 
     while (!valid) {
 
@@ -1046,6 +1967,7 @@ function createFood() {
 function createCoin() {
 
     let valid = false;
+
 
     while (!valid) {
 
@@ -1095,20 +2017,24 @@ function endGame() {
 
     clearInterval(gameLoop);
 
+
     startButton.textContent =
         "TEKRAR OYNA";
 
 
-    setTimeout(() => {
+    setTimeout(
+        () => {
 
-        alert(
-            "Oyun bitti! Skorun: " +
-            score +
-            "\n\n🪙 Coin: " +
-            coins
-        );
+            alert(
+                "Oyun bitti! Skorun: " +
+                score +
+                "\n\n🪙 Coin: " +
+                coins
+            );
 
-    }, 100);
+        },
+        100
+    );
 }
 
 
@@ -1190,12 +2116,13 @@ canvas.addEventListener(
         const touch =
             event.touches[0];
 
+
         touchStartX =
             touch.clientX;
 
+
         touchStartY =
             touch.clientY;
-
     },
     {
         passive: true
@@ -1220,6 +2147,7 @@ canvas.addEventListener(
             touch.clientX -
             touchStartX;
 
+
         const dy =
             touch.clientY -
             touchStartY;
@@ -1229,6 +2157,7 @@ canvas.addEventListener(
             Math.abs(dx) < 20 &&
             Math.abs(dy) < 20
         ) {
+
             return;
         }
 
@@ -1286,7 +2215,6 @@ canvas.addEventListener(
                 };
             }
         }
-
     },
     {
         passive: true
@@ -1295,7 +2223,7 @@ canvas.addEventListener(
 
 
 // =====================================
-// OYNA
+// BUTONLAR
 // =====================================
 
 startButton.addEventListener(
@@ -1304,8 +2232,6 @@ startButton.addEventListener(
 );
 
 
-// =====================================
-// COIN SAYACINI GÖSTER
-// =====================================
-
 drawCoinCounter();
+
+createSnakeButton();
