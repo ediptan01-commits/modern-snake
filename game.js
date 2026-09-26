@@ -1,59 +1,52 @@
+const game = document.getElementById("game");
+const scoreText = document.getElementById("score");
+const startButton = document.getElementById("startButton");
+
 const canvas = document.createElement("canvas");
 canvas.width = 400;
 canvas.height = 400;
 
-document.body.appendChild(canvas);
+game.appendChild(canvas);
 
 const ctx = canvas.getContext("2d");
 
 const grid = 20;
 
-let snake = [
-    { x: 200, y: 200 },
-    { x: 180, y: 200 },
-    { x: 160, y: 200 }
-];
+let snake;
+let food;
+let direction;
+let nextDirection;
+let score;
+let gameRunning = false;
+let gameLoop;
 
-let direction = { x: grid, y: 0 };
+function startGame() {
+    snake = [
+        { x: 200, y: 200 },
+        { x: 180, y: 200 },
+        { x: 160, y: 200 }
+    ];
 
-let food = {
-    x: 300,
-    y: 200
-};
+    direction = { x: grid, y: 0 };
+    nextDirection = direction;
 
-function draw() {
-    ctx.fillStyle = "#101522";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    score = 0;
 
-    // Yem
-    ctx.fillStyle = "#ff3d71";
-    ctx.beginPath();
-    ctx.arc(
-        food.x + grid / 2,
-        food.y + grid / 2,
-        8,
-        0,
-        Math.PI * 2
-    );
-    ctx.fill();
+    createFood();
+    gameRunning = true;
 
-    // Yılan
-    snake.forEach((part, index) => {
-        ctx.fillStyle = index === 0 ? "#00e5ff" : "#00a9c0";
+    scoreText.textContent = "Skor: 0";
+    startButton.textContent = "YENİDEN BAŞLAT";
 
-        ctx.beginPath();
-        ctx.roundRect(
-            part.x + 2,
-            part.y + 2,
-            grid - 4,
-            grid - 4,
-            6
-        );
-        ctx.fill();
-    });
+    clearInterval(gameLoop);
+    gameLoop = setInterval(update, 120);
+
+    draw();
 }
 
 function update() {
+    direction = nextDirection;
+
     const head = {
         x: snake[0].x + direction.x,
         y: snake[0].y + direction.y
@@ -66,17 +59,30 @@ function update() {
         head.x >= canvas.width ||
         head.y >= canvas.height
     ) {
-        gameOver();
+        endGame();
+        return;
+    }
+
+    // Kendine çarpma
+    if (
+        snake.some(
+            part => part.x === head.x && part.y === head.y
+        )
+    ) {
+        endGame();
         return;
     }
 
     snake.unshift(head);
 
-    // Yem yendi
+    // Yem
     if (
         head.x === food.x &&
         head.y === food.y
     ) {
+        score += 10;
+        scoreText.textContent = "Skor: " + score;
+
         createFood();
     } else {
         snake.pop();
@@ -85,38 +91,118 @@ function update() {
     draw();
 }
 
+function draw() {
+    ctx.fillStyle = "#101522";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Izgara
+    ctx.strokeStyle = "#182131";
+
+    for (let x = 0; x < canvas.width; x += grid) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+    }
+
+    for (let y = 0; y < canvas.height; y += grid) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+    }
+
+    // Yem
+    ctx.fillStyle = "#ff3d71";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        food.x + grid / 2,
+        food.y + grid / 2,
+        8,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fill();
+
+    // Yılan
+    snake.forEach((part, index) => {
+
+        ctx.fillStyle =
+            index === 0
+                ? "#00e5ff"
+                : "#00a9c0";
+
+        ctx.beginPath();
+
+        ctx.roundRect(
+            part.x + 2,
+            part.y + 2,
+            grid - 4,
+            grid - 4,
+            6
+        );
+
+        ctx.fill();
+    });
+}
+
 function createFood() {
-    food.x =
-        Math.floor(Math.random() * (canvas.width / grid)) * grid;
+    food = {
+        x: Math.floor(
+            Math.random() * (canvas.width / grid)
+        ) * grid,
 
-    food.y =
-        Math.floor(Math.random() * (canvas.height / grid)) * grid;
+        y: Math.floor(
+            Math.random() * (canvas.height / grid)
+        ) * grid
+    };
 }
 
-function gameOver() {
-    alert("OYUN BİTTİ!");
-    location.reload();
+function endGame() {
+    gameRunning = false;
+    clearInterval(gameLoop);
+
+    startButton.textContent = "TEKRAR OYNA";
+
+    setTimeout(() => {
+        alert("Oyun bitti! Skorun: " + score);
+    }, 100);
 }
 
-document.addEventListener("keydown", (event) => {
+document.addEventListener("keydown", event => {
 
-    if (event.key === "ArrowUp" && direction.y === 0) {
-        direction = { x: 0, y: -grid };
+    if (!gameRunning) return;
+
+    if (
+        event.key === "ArrowUp" &&
+        direction.y === 0
+    ) {
+        nextDirection = { x: 0, y: -grid };
     }
 
-    if (event.key === "ArrowDown" && direction.y === 0) {
-        direction = { x: 0, y: grid };
+    if (
+        event.key === "ArrowDown" &&
+        direction.y === 0
+    ) {
+        nextDirection = { x: 0, y: grid };
     }
 
-    if (event.key === "ArrowLeft" && direction.x === 0) {
-        direction = { x: -grid, y: 0 };
+    if (
+        event.key === "ArrowLeft" &&
+        direction.x === 0
+    ) {
+        nextDirection = { x: -grid, y: 0 };
     }
 
-    if (event.key === "ArrowRight" && direction.x === 0) {
-        direction = { x: grid, y: 0 };
+    if (
+        event.key === "ArrowRight" &&
+        direction.x === 0
+    ) {
+        nextDirection = { x: grid, y: 0 };
     }
 });
 
-draw();
-
-setInterval(update, 120);
+startButton.addEventListener("click", startGame);
