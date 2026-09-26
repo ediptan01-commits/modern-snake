@@ -12,39 +12,46 @@ const ctx = canvas.getContext("2d");
 
 const grid = 20;
 
-let snake;
-let food;
-let direction;
-let nextDirection;
-let score;
+let snake = [];
+let food = {};
+let direction = { x: grid, y: 0 };
+let nextDirection = { x: grid, y: 0 };
+
+let score = 0;
 let gameRunning = false;
 let gameLoop;
 
 function startGame() {
+
     snake = [
         { x: 200, y: 200 },
         { x: 180, y: 200 },
-        { x: 160, y: 200 }
+        { x: 160, y: 200 },
+        { x: 140, y: 200 }
     ];
 
     direction = { x: grid, y: 0 };
-    nextDirection = direction;
+    nextDirection = { x: grid, y: 0 };
 
     score = 0;
 
+    scoreText.textContent = "Skor: 0";
+
     createFood();
+
     gameRunning = true;
 
-    scoreText.textContent = "Skor: 0";
     startButton.textContent = "YENİDEN BAŞLAT";
 
     clearInterval(gameLoop);
+
     gameLoop = setInterval(update, 120);
 
     draw();
 }
 
 function update() {
+
     direction = nextDirection;
 
     const head = {
@@ -66,7 +73,9 @@ function update() {
     // Kendine çarpma
     if (
         snake.some(
-            part => part.x === head.x && part.y === head.y
+            part =>
+                part.x === head.x &&
+                part.y === head.y
         )
     ) {
         endGame();
@@ -75,16 +84,21 @@ function update() {
 
     snake.unshift(head);
 
-    // Yem
+    // Yem yeme
     if (
         head.x === food.x &&
         head.y === food.y
     ) {
+
         score += 10;
-        scoreText.textContent = "Skor: " + score;
+
+        scoreText.textContent =
+            "Skor: " + score;
 
         createFood();
+
     } else {
+
         snake.pop();
     }
 
@@ -92,171 +106,538 @@ function update() {
 }
 
 function draw() {
+
+    // Arka plan
     ctx.fillStyle = "#101522";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
 
     // Izgara
     ctx.strokeStyle = "#182131";
+    ctx.lineWidth = 1;
 
-    for (let x = 0; x < canvas.width; x += grid) {
+    for (
+        let x = 0;
+        x < canvas.width;
+        x += grid
+    ) {
+
         ctx.beginPath();
         ctx.moveTo(x, 0);
         ctx.lineTo(x, canvas.height);
         ctx.stroke();
     }
 
-    for (let y = 0; y < canvas.height; y += grid) {
+    for (
+        let y = 0;
+        y < canvas.height;
+        y += grid
+    ) {
+
         ctx.beginPath();
         ctx.moveTo(0, y);
         ctx.lineTo(canvas.width, y);
         ctx.stroke();
     }
 
-    // Yem
-    ctx.fillStyle = "#ff3d71";
+    drawFood();
+    drawSnake();
+}
+
+function drawFood() {
+
+    const x = food.x + grid / 2;
+    const y = food.y + grid / 2;
+
+    const gradient =
+        ctx.createRadialGradient(
+            x - 3,
+            y - 3,
+            1,
+            x,
+            y,
+            10
+        );
+
+    gradient.addColorStop(
+        0,
+        "#ff9bb2"
+    );
+
+    gradient.addColorStop(
+        0.5,
+        "#ff3d71"
+    );
+
+    gradient.addColorStop(
+        1,
+        "#8a1235"
+    );
+
+    ctx.fillStyle = gradient;
 
     ctx.beginPath();
 
     ctx.arc(
-        food.x + grid / 2,
-        food.y + grid / 2,
-        8,
+        x,
+        y,
+        9,
         0,
         Math.PI * 2
     );
 
     ctx.fill();
+}
 
-    // Yılan
+function drawSnake() {
+
     snake.forEach((part, index) => {
 
-        ctx.fillStyle =
-            index === 0
-                ? "#00e5ff"
-                : "#00a9c0";
+        const x = part.x + grid / 2;
+        const y = part.y + grid / 2;
 
-        ctx.beginPath();
+        // 🐍 BAŞ
+        if (index === 0) {
 
-        ctx.roundRect(
-            part.x + 2,
-            part.y + 2,
-            grid - 4,
-            grid - 4,
-            6
-        );
+            ctx.save();
 
-        ctx.fill();
+            ctx.translate(x, y);
+
+            let angle = 0;
+
+            if (direction.x > 0) {
+                angle = 0;
+            }
+
+            if (direction.x < 0) {
+                angle = Math.PI;
+            }
+
+            if (direction.y < 0) {
+                angle = -Math.PI / 2;
+            }
+
+            if (direction.y > 0) {
+                angle = Math.PI / 2;
+            }
+
+            ctx.rotate(angle);
+
+            // Baş gölgesi
+            ctx.fillStyle =
+                "rgba(0,0,0,0.35)";
+
+            ctx.beginPath();
+
+            ctx.ellipse(
+                1,
+                2,
+                14,
+                11,
+                0,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.fill();
+
+            // Baş
+            const headGradient =
+                ctx.createRadialGradient(
+                    -4,
+                    -4,
+                    2,
+                    0,
+                    0,
+                    15
+                );
+
+            headGradient.addColorStop(
+                0,
+                "#a4e96d"
+            );
+
+            headGradient.addColorStop(
+                0.45,
+                "#4fae3e"
+            );
+
+            headGradient.addColorStop(
+                1,
+                "#163d1b"
+            );
+
+            ctx.fillStyle =
+                headGradient;
+
+            ctx.beginPath();
+
+            ctx.ellipse(
+                0,
+                0,
+                14,
+                10,
+                0,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.fill();
+
+            // Gözler
+            ctx.fillStyle = "#f4df55";
+
+            ctx.beginPath();
+
+            ctx.arc(
+                7,
+                -6,
+                3.5,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.arc(
+                7,
+                6,
+                3.5,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.fill();
+
+            // Göz bebekleri
+            ctx.fillStyle = "#050505";
+
+            ctx.beginPath();
+
+            ctx.arc(
+                8,
+                -6,
+                1.5,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.arc(
+                8,
+                6,
+                1.5,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.fill();
+
+            // Çatallı dil
+            ctx.strokeStyle = "#ff3158";
+            ctx.lineWidth = 1.5;
+
+            ctx.beginPath();
+
+            ctx.moveTo(12, 0);
+            ctx.lineTo(20, 0);
+
+            ctx.moveTo(20, 0);
+            ctx.lineTo(24, -3);
+
+            ctx.moveTo(20, 0);
+            ctx.lineTo(24, 3);
+
+            ctx.stroke();
+
+            ctx.restore();
+
+        } else {
+
+            // 🐍 GÖVDE
+
+            const radius =
+                Math.max(
+                    7,
+                    10 - index * 0.03
+                );
+
+            const gradient =
+                ctx.createRadialGradient(
+                    x - 3,
+                    y - 3,
+                    1,
+                    x,
+                    y,
+                    radius
+                );
+
+            gradient.addColorStop(
+                0,
+                "#8bdb5d"
+            );
+
+            gradient.addColorStop(
+                0.45,
+                "#4ca83d"
+            );
+
+            gradient.addColorStop(
+                1,
+                "#193f1d"
+            );
+
+            ctx.fillStyle =
+                gradient;
+
+            ctx.beginPath();
+
+            ctx.arc(
+                x,
+                y,
+                radius,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.fill();
+
+            // Pul deseni
+            ctx.strokeStyle =
+                "rgba(190,240,120,0.35)";
+
+            ctx.lineWidth = 1;
+
+            ctx.beginPath();
+
+            ctx.arc(
+                x,
+                y,
+                radius - 2,
+                0,
+                Math.PI
+            );
+
+            ctx.stroke();
+
+            // Gövde parlaklığı
+            ctx.fillStyle =
+                "rgba(210,255,160,0.18)";
+
+            ctx.beginPath();
+
+            ctx.arc(
+                x - 3,
+                y - 3,
+                2,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.fill();
+        }
     });
 }
 
 function createFood() {
-    food = {
-        x: Math.floor(
-            Math.random() * (canvas.width / grid)
-        ) * grid,
 
-        y: Math.floor(
-            Math.random() * (canvas.height / grid)
-        ) * grid
+    food = {
+
+        x:
+            Math.floor(
+                Math.random() *
+                (canvas.width / grid)
+            ) * grid,
+
+        y:
+            Math.floor(
+                Math.random() *
+                (canvas.height / grid)
+            ) * grid
     };
 }
 
 function endGame() {
+
     gameRunning = false;
+
     clearInterval(gameLoop);
 
-    startButton.textContent = "TEKRAR OYNA";
+    startButton.textContent =
+        "TEKRAR OYNA";
 
     setTimeout(() => {
-        alert("Oyun bitti! Skorun: " + score);
+
+        alert(
+            "Oyun bitti! Skorun: " +
+            score
+        );
+
     }, 100);
 }
 
-document.addEventListener("keydown", event => {
 
-    if (!gameRunning) return;
+// ⌨️ KLAVYE KONTROLLERİ
 
-    if (
-        event.key === "ArrowUp" &&
-        direction.y === 0
-    ) {
-        nextDirection = { x: 0, y: -grid };
+document.addEventListener(
+    "keydown",
+    event => {
+
+        if (!gameRunning) return;
+
+        if (
+            event.key === "ArrowUp" &&
+            direction.y === 0
+        ) {
+
+            nextDirection = {
+                x: 0,
+                y: -grid
+            };
+        }
+
+        if (
+            event.key === "ArrowDown" &&
+            direction.y === 0
+        ) {
+
+            nextDirection = {
+                x: 0,
+                y: grid
+            };
+        }
+
+        if (
+            event.key === "ArrowLeft" &&
+            direction.x === 0
+        ) {
+
+            nextDirection = {
+                x: -grid,
+                y: 0
+            };
+        }
+
+        if (
+            event.key === "ArrowRight" &&
+            direction.x === 0
+        ) {
+
+            nextDirection = {
+                x: grid,
+                y: 0
+            };
+        }
     }
+);
 
-    if (
-        event.key === "ArrowDown" &&
-        direction.y === 0
-    ) {
-        nextDirection = { x: 0, y: grid };
-    }
 
-    if (
-        event.key === "ArrowLeft" &&
-        direction.x === 0
-    ) {
-        nextDirection = { x: -grid, y: 0 };
-    }
+// 📱 TELEFON KAYDIRMA KONTROLÜ
 
-    if (
-        event.key === "ArrowRight" &&
-        direction.x === 0
-    ) {
-        nextDirection = { x: grid, y: 0 };
-    }
-});
-
-startButton.addEventListener("click", startGame);
-
-// 📱 Dokunmatik kontrol
 let touchStartX = 0;
 let touchStartY = 0;
 
-canvas.addEventListener("touchstart", (event) => {
-    const touch = event.touches[0];
+canvas.addEventListener(
+    "touchstart",
+    event => {
 
-    touchStartX = touch.clientX;
-    touchStartY = touch.clientY;
-});
+        const touch =
+            event.touches[0];
 
-canvas.addEventListener("touchend", (event) => {
-    if (!gameRunning) return;
+        touchStartX =
+            touch.clientX;
 
-    const touch = event.changedTouches[0];
+        touchStartY =
+            touch.clientY;
+    },
+    { passive: true }
+);
 
-    const touchEndX = touch.clientX;
-    const touchEndY = touch.clientY;
+canvas.addEventListener(
+    "touchend",
+    event => {
 
-    const dx = touchEndX - touchStartX;
-    const dy = touchEndY - touchStartY;
+        if (!gameRunning) return;
 
-    // Çok küçük hareketleri yok say
-    if (Math.abs(dx) < 20 && Math.abs(dy) < 20) {
-        return;
-    }
+        const touch =
+            event.changedTouches[0];
 
-    // Yatay hareket
-    if (Math.abs(dx) > Math.abs(dy)) {
+        const dx =
+            touch.clientX -
+            touchStartX;
 
-        if (dx > 0 && direction.x === 0) {
-            nextDirection = { x: grid, y: 0 };
+        const dy =
+            touch.clientY -
+            touchStartY;
+
+        if (
+            Math.abs(dx) < 20 &&
+            Math.abs(dy) < 20
+        ) {
+            return;
         }
 
-        if (dx < 0 && direction.x === 0) {
-            nextDirection = { x: -grid, y: 0 };
+        if (
+            Math.abs(dx) >
+            Math.abs(dy)
+        ) {
+
+            if (
+                dx > 0 &&
+                direction.x === 0
+            ) {
+
+                nextDirection = {
+                    x: grid,
+                    y: 0
+                };
+            }
+
+            if (
+                dx < 0 &&
+                direction.x === 0
+            ) {
+
+                nextDirection = {
+                    x: -grid,
+                    y: 0
+                };
+            }
+
+        } else {
+
+            if (
+                dy > 0 &&
+                direction.y === 0
+            ) {
+
+                nextDirection = {
+                    x: 0,
+                    y: grid
+                };
+            }
+
+            if (
+                dy < 0 &&
+                direction.y === 0
+            ) {
+
+                nextDirection = {
+                    x: 0,
+                    y: -grid
+                };
+            }
         }
+    },
+    { passive: true }
+);
 
-    }
 
-    // Dikey hareket
-    else {
+// OYNA BUTONU
 
-        if (dy > 0 && direction.y === 0) {
-            nextDirection = { x: 0, y: grid };
-        }
-
-        if (dy < 0 && direction.y === 0) {
-            nextDirection = { x: 0, y: -grid };
-        }
-
-    }
-});
+startButton.addEventListener(
+    "click",
+    startGame
+);
