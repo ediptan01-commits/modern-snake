@@ -1325,204 +1325,214 @@ function drawSnake() {
 
     if (!snake || snake.length === 0) return;
 
-    let mainColor = "#4f9d35";
-    let darkColor = "#24551c";
-    let lightColor = "#8fcf55";
+    ctx.save();
+
+    let bodyColor = "#4d8f32";
+    let darkColor = "#1e3d16";
+    let lightColor = "#9acb55";
 
     if (selectedSnake === "python") {
-        mainColor = "#b88745";
-        darkColor = "#4a2c19";
-        lightColor = "#dfbd70";
+        bodyColor = "#9b7040";
+        darkColor = "#382719";
+        lightColor = "#d1aa62";
     }
 
     if (selectedSnake === "cobra") {
-        mainColor = "#587d3c";
-        darkColor = "#203719";
-        lightColor = "#a3bd68";
+        bodyColor = "#526d35";
+        darkColor = "#182411";
+        lightColor = "#9caf5a";
     }
 
     if (selectedSnake === "anaconda") {
-        mainColor = "#53663b";
-        darkColor = "#202c18";
-        lightColor = "#849b59";
+        bodyColor = "#3f5830";
+        darkColor = "#172414";
+        lightColor = "#71894c";
     }
 
     if (selectedSnake === "kingcobra") {
-        mainColor = "#a17b3b";
-        darkColor = "#38270e";
-        lightColor = "#d8bd68";
+        bodyColor = "#92703b";
+        darkColor = "#30230f";
+        lightColor = "#d0b86a";
     }
 
     if (selectedSnake === "albino") {
-        mainColor = "#e8d9a0";
-        darkColor = "#9b7d45";
-        lightColor = "#fff3c5";
+        bodyColor = "#e6d49a";
+        darkColor = "#80673e";
+        lightColor = "#fff1bd";
     }
 
-    // GÖVDE
-    for (let i = snake.length - 1; i >= 0; i--) {
+    const thickness =
+        selectedSnake === "anaconda" ? 25 :
+        selectedSnake === "python" ? 22 :
+        20;
 
-        const part = snake[i];
+    const points = snake.map(part => ({
+        x: part.x + grid / 2,
+        y: part.y + grid / 2
+    }));
 
-        const x = part.x + grid / 2;
-        const y = part.y + grid / 2;
+    /*
+     * GÖLGE
+     */
+    ctx.beginPath();
 
-        const radius =
-            selectedSnake === "anaconda"
-                ? 12
-                : 10;
+    points.forEach((p, i) => {
+        if (i === 0) {
+            ctx.moveTo(p.x + 3, p.y + 5);
+        } else {
+            ctx.lineTo(p.x + 3, p.y + 5);
+        }
+    });
 
-        // Gölge
-        ctx.fillStyle = "rgba(0,0,0,.35)";
-
-        ctx.beginPath();
-
-        ctx.arc(
-            x + 2,
-            y + 3,
-            radius,
-            0,
-            Math.PI * 2
-        );
-
-        ctx.fill();
-
-
-        // Ana gövde
-        const gradient =
-            ctx.createRadialGradient(
-                x - 4,
-                y - 5,
-                2,
-                x,
-                y,
-                radius + 5
-            );
-
-        gradient.addColorStop(
-            0,
-            lightColor
-        );
-
-        gradient.addColorStop(
-            0.45,
-            mainColor
-        );
-
-        gradient.addColorStop(
-            1,
-            darkColor
-        );
-
-        ctx.fillStyle = gradient;
-
-        ctx.beginPath();
-
-        ctx.arc(
-            x,
-            y,
-            radius,
-            0,
-            Math.PI * 2
-        );
-
-        ctx.fill();
+    ctx.lineWidth = thickness + 5;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.strokeStyle = "rgba(0,0,0,.38)";
+    ctx.stroke();
 
 
-        // PITON BENEKLERİ
-        if (
-            selectedSnake === "python" &&
-            i % 2 === 0
-        ) {
+    /*
+     * ANA GÖVDE
+     */
+    const gradient = ctx.createLinearGradient(
+        0,
+        -thickness,
+        0,
+        thickness
+    );
 
-            ctx.fillStyle =
-                "rgba(55,30,18,.75)";
+    gradient.addColorStop(0, lightColor);
+    gradient.addColorStop(.35, bodyColor);
+    gradient.addColorStop(.75, bodyColor);
+    gradient.addColorStop(1, darkColor);
+
+    ctx.beginPath();
+
+    points.forEach((p, i) => {
+        if (i === 0) {
+            ctx.moveTo(p.x, p.y);
+        } else {
+            ctx.lineTo(p.x, p.y);
+        }
+    });
+
+    ctx.lineWidth = thickness;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.strokeStyle = gradient;
+    ctx.stroke();
+
+
+    /*
+     * PITON DESENİ
+     */
+    if (selectedSnake === "python") {
+
+        ctx.lineWidth = 3;
+
+        for (let i = 1; i < points.length; i += 2) {
+
+            const p = points[i];
+
+            ctx.strokeStyle = "rgba(48,29,18,.75)";
 
             ctx.beginPath();
 
             ctx.ellipse(
-                x,
-                y,
-                5,
-                3,
-                Math.PI / 4,
+                p.x,
+                p.y,
+                7,
+                4,
+                .5,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.stroke();
+        }
+    }
+
+
+    /*
+     * ANAKONDA LEKELERİ
+     */
+    if (selectedSnake === "anaconda") {
+
+        for (let i = 1; i < points.length; i += 2) {
+
+            const p = points[i];
+
+            ctx.fillStyle =
+                "rgba(15,25,10,.65)";
+
+            ctx.beginPath();
+
+            ctx.ellipse(
+                p.x,
+                p.y,
+                7,
+                4,
+                .3,
                 0,
                 Math.PI * 2
             );
 
             ctx.fill();
         }
+    }
 
 
-        // ANAKONDA DESENİ
-        if (
-            selectedSnake === "anaconda" &&
-            i % 2 === 0
-        ) {
+    /*
+     * KOBRA ÇİZGİLERİ
+     */
+    if (
+        selectedSnake === "cobra" ||
+        selectedSnake === "kingcobra"
+    ) {
 
-            ctx.strokeStyle =
-                "rgba(20,30,12,.65)";
+        for (let i = 1; i < points.length; i += 2) {
 
-            ctx.lineWidth = 2;
-
-            ctx.beginPath();
-
-            ctx.arc(
-                x,
-                y,
-                5,
-                0,
-                Math.PI
-            );
-
-            ctx.stroke();
-        }
-
-
-        // KOBRA / KRAL KOBRA ÇİZGİLERİ
-        if (
-            (
-                selectedSnake === "cobra" ||
-                selectedSnake === "kingcobra"
-            ) &&
-            i % 2 === 0
-        ) {
+            const p = points[i];
 
             ctx.strokeStyle =
-                "rgba(30,25,10,.6)";
+                "rgba(25,20,8,.55)";
 
             ctx.lineWidth = 2;
 
             ctx.beginPath();
 
             ctx.moveTo(
-                x - 5,
-                y
+                p.x - 7,
+                p.y
             );
 
             ctx.lineTo(
-                x + 5,
-                y
+                p.x + 7,
+                p.y
             );
 
             ctx.stroke();
         }
+    }
 
 
-        // ALBİNO BENEKLERİ
-        if (
-            selectedSnake === "albino" &&
-            i % 2 === 0
-        ) {
+    /*
+     * ALBİNO DESENLERİ
+     */
+    if (selectedSnake === "albino") {
+
+        for (let i = 1; i < points.length; i += 2) {
+
+            const p = points[i];
 
             ctx.fillStyle =
-                "rgba(190,75,60,.6)";
+                "rgba(190,70,55,.65)";
 
             ctx.beginPath();
 
             ctx.arc(
-                x,
-                y,
+                p.x,
+                p.y,
                 2.5,
                 0,
                 Math.PI * 2
@@ -1533,9 +1543,38 @@ function drawSnake() {
     }
 
 
+    /*
+     * ÜSTÜNDEKİ IŞIK
+     */
+    ctx.beginPath();
+
+    points.forEach((p, i) => {
+        if (i === 0) {
+            ctx.moveTo(
+                p.x,
+                p.y - thickness * .22
+            );
+        } else {
+            ctx.lineTo(
+                p.x,
+                p.y - thickness * .22
+            );
+        }
+    });
+
+    ctx.lineWidth = 2;
+    ctx.lineCap = "round";
+    ctx.strokeStyle = "rgba(255,255,255,.18)";
+    ctx.stroke();
+
+
+    ctx.restore();
+
+
     // BAŞ
     drawSnakeHead();
 }
+
 // =====================================================
 // COIN ÇİZ
 // =====================================================
