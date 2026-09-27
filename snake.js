@@ -936,7 +936,7 @@ function update() {
     eatingAnimation = 8;
 
     // Her 3 yemden sonra sadece 1 parça uzasın
-    if (foodGrowth >= 3) {
+    if (foodGrowth >= 2) {
         foodGrowth = 0;
     } else {
         snake.pop();
