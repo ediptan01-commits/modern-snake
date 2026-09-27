@@ -1725,109 +1725,48 @@ function drawAlbinoPattern(
 // =====================================================
 
 function drawSmoothSnakePath() {
+    if (!snake || snake.length < 2) return;
 
-    if (
-        snake.length < 2
-    ) {
-        return;
-    }
-
-
-    const points =
-        snake.map(
-            part => ({
-
-                x:
-                    part.x +
-                    grid / 2,
-
-                y:
-                    part.y +
-                    grid / 2
-            })
-        );
-
+    const points = snake.map(part => ({
+        x: part.x + grid / 2,
+        y: part.y + grid / 2
+    }));
 
     ctx.beginPath();
 
+    ctx.moveTo(points[0].x, points[0].y);
 
-    ctx.moveTo(
+    for (let i = 0; i < points.length - 1; i++) {
 
-        points[
-            points.length - 1
-        ].x,
+        const p0 = points[Math.max(0, i - 1)];
+        const p1 = points[i];
+        const p2 = points[i + 1];
+        const p3 = points[
+            Math.min(points.length - 1, i + 2)
+        ];
 
-        points[
-            points.length - 1
-        ].y
+        const cp1 = {
+            x: p1.x + (p2.x - p0.x) / 6,
+            y: p1.y + (p2.y - p0.y) / 6
+        };
 
-    );
+        const cp2 = {
+            x: p2.x - (p3.x - p1.x) / 6,
+            y: p2.y - (p3.y - p1.y) / 6
+        };
 
-
-    for (
-        let i =
-            points.length - 1;
-
-        i > 0;
-
-        i--
-    ) {
-
-        const current =
-            points[i];
-
-
-        const next =
-            points[i - 1];
-
-
-        const midX =
-            (
-                current.x +
-                next.x
-            ) / 2;
-
-
-        const midY =
-            (
-                current.y +
-                next.y
-            ) / 2;
-
-
-        ctx.quadraticCurveTo(
-
-            current.x,
-
-            current.y,
-
-            midX,
-
-            midY
-
+        ctx.bezierCurveTo(
+            cp1.x,
+            cp1.y,
+            cp2.x,
+            cp2.y,
+            p2.x,
+            p2.y
         );
     }
 
-
-    const first =
-        points[0];
-
-
-    const second =
-        points[1];
-
-
-    ctx.quadraticCurveTo(
-
-        second.x,
-
-        second.y,
-
-        first.x,
-
-        first.y
-
-    );
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
 }
 
 // =====================================================
