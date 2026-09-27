@@ -1,3 +1,5 @@
+let currentArena = "orman";
+
 const game = document.getElementById("game");
 const scoreText = document.getElementById("score");
 const startButton = document.getElementById("startButton");
@@ -1026,6 +1028,31 @@ if (foodGrowth >= 1) {
 // =====================================================
 
 function draw() {
+   
+    // ORMAN ARENASI
+if (currentArena === "orman") {
+    ctx.fillStyle = "#4f8f3a";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Çim dokusu
+    ctx.fillStyle = "rgba(255,255,255,0.08)";
+
+    for (let x = 0; x < canvas.width; x += 20) {
+        for (let y = 0; y < canvas.height; y += 20) {
+            ctx.fillRect(x + 5, y + 5, 2, 2);
+        }
+    }
+
+    // Ağaçlar
+    ctx.fillStyle = "#315c28";
+
+    ctx.beginPath();
+    ctx.arc(30, 35, 18, 0, Math.PI * 2);
+    ctx.arc(canvas.width - 30, 35, 18, 0, Math.PI * 2);
+    ctx.arc(30, canvas.height - 35, 18, 0, Math.PI * 2);
+    ctx.arc(canvas.width - 30, canvas.height - 35, 18, 0, Math.PI * 2);
+    ctx.fill();
+}
 
     ctx.fillStyle =
         "#101522";
@@ -1089,7 +1116,6 @@ function draw() {
 
         ctx.stroke();
     }
-
 
     drawFood();
 
