@@ -225,6 +225,32 @@ function createSnakeButton() {
     );
 }
 
+function createArenaButton() {
+
+    if (document.getElementById("arenaButton"))
+        return;
+
+    const button = document.createElement("button");
+
+    button.id = "arenaButton";
+    button.textContent = "🌍 ARENALAR";
+
+    button.style.display = "block";
+    button.style.width = "85%";
+    button.style.margin = "12px auto";
+    button.style.padding = "15px";
+    button.style.border = "none";
+    button.style.borderRadius = "18px";
+    button.style.background =
+        "linear-gradient(135deg,#26734d,#183d2c)";
+    button.style.color = "white";
+    button.style.fontSize = "20px";
+    button.style.fontWeight = "bold";
+
+    button.onclick = createArenaMenu;
+
+    startButton.parentElement.appendChild(button);
+}
 
 // =====================================================
 // TAM EKRAN YILAN MENÜSÜ
