@@ -25,6 +25,7 @@ let direction = { x: grid, y: 0 };
 let nextDirection = { x: grid, y: 0 };
 
 let score = 0;
+let foodGrowth = 0;
 let coins = Number(
     localStorage.getItem("modernSnakeCoins") || 0
 );
@@ -784,7 +785,9 @@ function startGame() {
 
 
     score = 0;
-
+    
+    foodGrowth = 0;
+    
     tongueTimer = 0;
 
     tonguePower = 0;
@@ -908,51 +911,42 @@ function update() {
     // =================================================
 
     if (
+    food &&
+    head.x === food.x &&
+    head.y === food.y &&
+    eatingAnimation === 0
+) {
 
-        food &&
+    score += 10;
 
-        head.x ===
-        food.x &&
+    scoreText.textContent =
+        "Skor: " + score;
 
-        head.y ===
-        food.y &&
+    foodGrowth++;
 
-        eatingAnimation === 0
+    eatenFood = {
+        x: food.x,
+        y: food.y
+    };
 
-    ) {
+    food = null;
 
-        score += 10;
+    tonguePower = 1;
+    tongueTimer = 8;
+    eatingAnimation = 8;
 
-
-        scoreText.textContent =
-            "Skor: " + score;
-
-
-        eatenFood = {
-
-            x: food.x,
-
-            y: food.y
-        };
-
-
-        food = null;
-
-
-        tonguePower = 1;
-
-        tongueTimer = 8;
-
-        eatingAnimation = 8;
-
+    // Her 3 yemden sonra sadece 1 parça uzasın
+    if (foodGrowth >= 3) {
+        foodGrowth = 0;
     } else {
+        snake.pop();
+    }
 
-        if (
-            eatingAnimation === 0
-        ) {
+} else {
 
-            snake.pop();
-        }
+    // Normal hareketlerde kuyruğu çıkar
+    snake.pop();
+
     }
 
 
