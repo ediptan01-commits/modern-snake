@@ -1773,362 +1773,339 @@ function drawSmoothSnakePath() {
 // YILAN BAŞI
 // =====================================================
 
+
 function drawSnakeHead() {
 
-    const head =
-        snake[0];
+    if (!snake || snake.length === 0) return;
 
+    const head = snake[0];
 
-    const headX =
-        head.x +
-        grid / 2;
-
-
-    const headY =
-        head.y +
-        grid / 2;
-
+    const headX = head.x + grid / 2;
+    const headY = head.y + grid / 2;
 
     ctx.save();
 
-
-    ctx.translate(
-        headX,
-        headY
-    );
-
-
+    // YÖN
     let angle = 0;
 
-
-    if (
-        direction.x > 0
-    ) {
-
+    if (direction.x > 0) {
         angle = 0;
-
-    } else if (
-        direction.x < 0
-    ) {
-
-        angle =
-            Math.PI;
-
-    } else if (
-        direction.y < 0
-    ) {
-
-        angle =
-            -Math.PI / 2;
-
-    } else if (
-        direction.y > 0
-    ) {
-
-        angle =
-            Math.PI / 2;
+    } else if (direction.x < 0) {
+        angle = Math.PI;
+    } else if (direction.y < 0) {
+        angle = -Math.PI / 2;
+    } else if (direction.y > 0) {
+        angle = Math.PI / 2;
     }
 
-
+    ctx.translate(headX, headY);
     ctx.rotate(angle);
 
+    // ------------------------------------------------
+    // 3D GÖLGE
+    // ------------------------------------------------
 
-    // KOBRA BOYUNU
+    ctx.shadowColor = "rgba(0,0,0,.65)";
+    ctx.shadowBlur = 10;
+    ctx.shadowOffsetX = 5;
+    ctx.shadowOffsetY = 7;
 
-    if (
-        selectedSnake ===
-        "cobra" ||
-        selectedSnake ===
-        "kingcobra"
-    ) {
+    // ------------------------------------------------
+    // RENKLER
+    // ------------------------------------------------
 
-        ctx.fillStyle =
-            selectedSnake ===
-            "cobra"
-                ? "#536d3e"
-                : "#735c2d";
+    let light = "#9bcf62";
+    let middle = "#4f8436";
+    let dark = "#172b12";
 
+    if (selectedSnake === "python") {
+        light = "#b98a52";
+        middle = "#704522";
+        dark = "#24160d";
+    }
+
+    if (selectedSnake === "cobra") {
+        light = "#8fcf9b";
+        middle = "#39734b";
+        dark = "#102d19";
+    }
+
+    if (selectedSnake === "anaconda") {
+        light = "#8da866";
+        middle = "#456238";
+        dark = "#172414";
+    }
+
+    if (selectedSnake === "kingcobra") {
+        light = "#c0a85a";
+        middle = "#66572c";
+        dark = "#211d0c";
+    }
+
+    if (selectedSnake === "albino") {
+        light = "#fff0d0";
+        middle = "#d99088";
+        dark = "#743b45";
+    }
+
+    // ------------------------------------------------
+    // ANA 3D KAFA
+    // ------------------------------------------------
+
+    const headGradient = ctx.createRadialGradient(
+        -7,
+        -9,
+        2,
+        3,
+        3,
+        24
+    );
+
+    headGradient.addColorStop(0, "#ffffff");
+    headGradient.addColorStop(.12, light);
+    headGradient.addColorStop(.48, middle);
+    headGradient.addColorStop(.82, dark);
+    headGradient.addColorStop(1, "#050805");
+
+    ctx.fillStyle = headGradient;
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+        2,
+        0,
+        22,
+        16,
+        0,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fill();
+
+    // Gölgeyi kapat
+    ctx.shadowColor = "transparent";
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+
+    // ------------------------------------------------
+    // ÜST PARLAKLIK
+    // ------------------------------------------------
+
+    const shine = ctx.createRadialGradient(
+        -8,
+        -9,
+        1,
+        -3,
+        -5,
+        14
+    );
+
+    shine.addColorStop(0, "rgba(255,255,255,.75)");
+    shine.addColorStop(.35, "rgba(255,255,255,.22)");
+    shine.addColorStop(1, "rgba(255,255,255,0)");
+
+    ctx.fillStyle = shine;
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+        -5,
+        -6,
+        10,
+        6,
+        -.3,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fill();
+
+    // ------------------------------------------------
+    // PULLAR
+    // ------------------------------------------------
+
+    ctx.strokeStyle = "rgba(0,0,0,.22)";
+    ctx.lineWidth = 1;
+
+    for (let x = -12; x <= 13; x += 7) {
+
+        for (let y = -9; y <= 9; y += 6) {
+
+            ctx.beginPath();
+
+            ctx.arc(
+                x,
+                y,
+                3,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.stroke();
+        }
+    }
+
+    // ------------------------------------------------
+    // GÖZLER
+    // ------------------------------------------------
+
+    function drawEye(x, y) {
+
+        const eyeGradient = ctx.createRadialGradient(
+            x - 2,
+            y - 2,
+            1,
+            x,
+            y,
+            6
+        );
+
+        eyeGradient.addColorStop(0, "#ffffff");
+        eyeGradient.addColorStop(.35, "#e7c95a");
+        eyeGradient.addColorStop(1, "#80630b");
+
+        ctx.fillStyle = eyeGradient;
 
         ctx.beginPath();
 
+        ctx.arc(
+            x,
+            y,
+            6,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.fill();
+
+        // Göz bebeği
+        ctx.fillStyle = "#050505";
+
+        ctx.beginPath();
 
         ctx.ellipse(
-            -5,
-            0,
-            25,
-            18,
+            x + 1,
+            y,
+            1.7,
+            4,
             0,
             0,
             Math.PI * 2
         );
 
+        ctx.fill();
+
+        // Göz parlaması
+        ctx.fillStyle = "white";
+
+        ctx.beginPath();
+
+        ctx.arc(
+            x - 2,
+            y - 2,
+            1.3,
+            0,
+            Math.PI * 2
+        );
 
         ctx.fill();
     }
 
+    drawEye(9, -8);
+    drawEye(9, 8);
 
-    // GÖLGE
+    // ------------------------------------------------
+    // BURUN DELİKLERİ
+    // ------------------------------------------------
 
-    ctx.fillStyle =
-        "rgba(0,0,0,.42)";
+    ctx.fillStyle = "#090909";
 
+    ctx.beginPath();
+    ctx.arc(20, -5, 1.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.arc(20, 5, 1.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // ------------------------------------------------
+    // AĞIZ ÇİZGİSİ
+    // ------------------------------------------------
+
+    ctx.strokeStyle = "rgba(20,10,5,.75)";
+    ctx.lineWidth = 1.5;
 
     ctx.beginPath();
 
-
-    ctx.ellipse(
-        2,
-        3,
-        18,
-        13,
-        0,
-        0,
-        Math.PI * 2
+    ctx.moveTo(8, 0);
+    ctx.quadraticCurveTo(
+        15,
+        4,
+        21,
+        0
     );
 
+    ctx.stroke();
 
-    ctx.fill();
-
-
-    // BAŞ
-
-    const headGradient =
-        ctx.createRadialGradient(
-            -6,
-            -6,
-            2,
-            0,
-            0,
-            20
-        );
-
+    // ------------------------------------------------
+    // DİŞLER
+    // ------------------------------------------------
 
     if (
-        selectedSnake ===
-        "python"
+        tongueTimer > 0 ||
+        eatingAnimation > 0
     ) {
 
-        headGradient.addColorStop(
-            0,
-            "#e4bd74"
-        );
+        ctx.fillStyle = "#fff4d6";
 
-        headGradient.addColorStop(
-            .5,
-            "#a87842"
-        );
+        ctx.beginPath();
 
-        headGradient.addColorStop(
-            1,
-            "#4b3021"
-        );
+        ctx.moveTo(17, 1);
+        ctx.lineTo(19, 5);
+        ctx.lineTo(21, 1);
+        ctx.closePath();
 
-    } else if (
-        selectedSnake ===
-        "cobra"
-    ) {
+        ctx.fill();
 
-        headGradient.addColorStop(
-            0,
-            "#a8c97d"
-        );
+        ctx.beginPath();
 
-        headGradient.addColorStop(
-            .5,
-            "#587944"
-        );
+        ctx.moveTo(17, -1);
+        ctx.lineTo(19, -5);
+        ctx.lineTo(21, -1);
+        ctx.closePath();
 
-        headGradient.addColorStop(
-            1,
-            "#20321c"
-        );
-
-    } else if (
-        selectedSnake ===
-        "anaconda"
-    ) {
-
-        headGradient.addColorStop(
-            0,
-            "#8b9c63"
-        );
-
-        headGradient.addColorStop(
-            .5,
-            "#52663a"
-        );
-
-        headGradient.addColorStop(
-            1,
-            "#202a19"
-        );
-
-    } else if (
-        selectedSnake ===
-        "kingcobra"
-    ) {
-
-        headGradient.addColorStop(
-            0,
-            "#dfc77d"
-        );
-
-        headGradient.addColorStop(
-            .5,
-            "#92753b"
-        );
-
-        headGradient.addColorStop(
-            1,
-            "#302511"
-        );
-
-    } else {
-
-        headGradient.addColorStop(
-            0,
-            "#fff8d8"
-        );
-
-        headGradient.addColorStop(
-            .5,
-            "#e8d58e"
-        );
-
-        headGradient.addColorStop(
-            1,
-            "#a18a50"
-        );
+        ctx.fill();
     }
 
-
-    ctx.fillStyle =
-        headGradient;
-
-
-    ctx.beginPath();
-
-
-    ctx.ellipse(
-        0,
-        0,
-        18,
-        13,
-        0,
-        0,
-        Math.PI * 2
-    );
-
-
-    ctx.fill();
-
-
-    // GÖZLER
-
-    ctx.fillStyle =
-        selectedSnake ===
-        "albino"
-            ? "#e05b6d"
-            : "#d9b62e";
-
-
-    ctx.beginPath();
-
-
-    ctx.arc(
-        8,
-        -7,
-        4,
-        0,
-        Math.PI * 2
-    );
-
-
-    ctx.arc(
-        8,
-        7,
-        4,
-        0,
-        Math.PI * 2
-    );
-
-
-    ctx.fill();
-
-
-    // GÖZ BEBEKLERİ
-
-    ctx.fillStyle =
-        "#080604";
-
-
-    ctx.beginPath();
-
-
-    ctx.ellipse(
-        9,
-        -7,
-        1.2,
-        3,
-        0,
-        0,
-        Math.PI * 2
-    );
-
-
-    ctx.ellipse(
-        9,
-        7,
-        1.2,
-        3,
-        0,
-        0,
-        Math.PI * 2
-    );
-
-
-    ctx.fill();
-
-
-    // BURUN
-
-    ctx.fillStyle =
-        "#24150e";
-
-
-    ctx.beginPath();
-
-
-    ctx.arc(
-        14,
-        -3,
-        1.2,
-        0,
-        Math.PI * 2
-    );
-
-
-    ctx.arc(
-        14,
-        3,
-        1.2,
-        0,
-        Math.PI * 2
-    );
-
-
-    ctx.fill();
-
-
+    // ------------------------------------------------
     // DİL
+    // ------------------------------------------------
 
-    if (
-        tonguePower > 0
-    ) {
+    if (tongueTimer > 0) {
 
-        drawTongue();
+        ctx.strokeStyle = "#d83b4b";
+        ctx.lineWidth = 2;
+        ctx.lineCap = "round";
+
+        ctx.beginPath();
+
+        ctx.moveTo(20, 0);
+        ctx.lineTo(31, 0);
+
+        ctx.stroke();
+
+        ctx.beginPath();
+
+        ctx.moveTo(31, 0);
+        ctx.lineTo(36, -4);
+
+        ctx.moveTo(31, 0);
+        ctx.lineTo(36, 4);
+
+        ctx.stroke();
     }
-
 
     ctx.restore();
 }
