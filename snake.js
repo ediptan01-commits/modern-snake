@@ -935,12 +935,12 @@ function update() {
     tongueTimer = 8;
     eatingAnimation = 8;
 
-    // Her 1 yemden sonra sadece 1 parça uzasın
-    if (foodGrowth >= 1) {
-        foodGrowth = 0;
-    } else {
-        snake.pop();
-    }
+    // Her yemden sonra az miktarda uzasın
+snake.pop();
+
+if (foodGrowth >= 1) {
+    foodGrowth = 0;
+}
 
 } else {
 
