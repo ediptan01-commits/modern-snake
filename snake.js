@@ -1130,6 +1130,8 @@ if (currentArena === "orman" && forestArenaImage.complete) {
     drawFood();
 
     drawCoin();
+
+    drawSnake3D();
     
 }
 
