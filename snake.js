@@ -1141,24 +1141,36 @@ function drawSnake3D() {
 
     const size = grid;
 
-    function drawSprite(img, part) {
+   
+function drawSprite(img, part) {
 
-        if (!img || !img.complete || img.naturalWidth === 0) {
-            return;
-        }
-
-        const x = part.x + grid / 2 - size / 2;
-        const y = part.y + grid / 2 - size / 2;
-
-        ctx.drawImage(
-            img,
-            x,
-            y,
-            size,
-            size
-        );
+    if (!img || !img.complete || img.naturalWidth === 0) {
+        return;
     }
 
+    let spriteSize = size;
+
+    // KAFA DAHA BÜYÜK
+    if (
+        img === snakeSprites.head.up ||
+        img === snakeSprites.head.right ||
+        img === snakeSprites.head.down ||
+        img === snakeSprites.head.left
+    ) {
+        spriteSize = grid * 2.5;
+    }
+
+    const x = part.x + grid / 2 - spriteSize / 2;
+    const y = part.y + grid / 2 - spriteSize / 2;
+
+    ctx.drawImage(
+        img,
+        x,
+        y,
+        spriteSize,
+        spriteSize
+    );
+}
 
     function getDirection(a, b) {
 
