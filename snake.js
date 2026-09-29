@@ -17,6 +17,9 @@ game.appendChild(canvas);
 
 const ctx = canvas.getContext("2d");
 
+const forestArenaImage = new Image();
+forestArenaImage.src = "forest-arena.svg";
+
 const grid = 20;
 
 let snake = [];
@@ -1057,23 +1060,28 @@ function draw() {
    
   // ARENA ARKA PLANI
 
-if (currentArena === "orman") {
 
-    ctx.fillStyle = "#315c28";
+if (currentArena === "orman" && forestArenaImage.complete) {
+
+    ctx.drawImage(
+        forestArenaImage,
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
 
 } else {
 
     ctx.fillStyle = "#101522";
 
+    ctx.fillRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
 }
-
-ctx.fillRect(
-    0,
-    0,
-    canvas.width,
-    canvas.height
-);
-
 
     // IZGARA
 
