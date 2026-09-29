@@ -20,6 +20,32 @@ const ctx = canvas.getContext("2d");
 const forestArenaImage = new Image();
 forestArenaImage.src = "forest-arena.png";
 
+// YILAN GÖRSELLERİ
+const snakeSprites = {
+    head: {
+        up: new Image(),
+        right: new Image(),
+        down: new Image(),
+        left: new Image()
+    },
+
+    body: new Image(),
+
+    turn: {
+        tr: new Image(),
+        tl: new Image(),
+        br: new Image(),
+        bl: new Image()
+    },
+
+    tail: {
+        up: new Image(),
+        right: new Image(),
+        down: new Image(),
+        left: new Image()
+    }
+};
+
 const grid = 20;
 
 let snake = [];
