@@ -1137,170 +1137,226 @@ if (currentArena === "orman" && forestArenaImage.complete) {
 
 function drawSnake3D() {
 
-    if (!snake || snake.length < 2) return;
+    if (!snake || snake.length === 0) return;
 
-    ctx.save();
+    const size = grid * 1.8;
 
-    // -----------------------------
-    // 3D GÖVDE AYARLARI
-    // -----------------------------
+    function drawSprite(img, part) {
 
-    let light = "#9fcf62";
-    let middle = "#4f8238";
-    let dark = "#172812";
+        if (!img || !img.complete || img.naturalWidth === 0) {
+            return;
+        }
 
-    if (selectedSnake === "python") {
-        light = "#b88b55";
-        middle = "#70451f";
-        dark = "#24150b";
-    }
+        const x = part.x + grid / 2 - size / 2;
+        const y = part.y + grid / 2 - size / 2;
 
-    if (selectedSnake === "cobra") {
-        light = "#91d09a";
-        middle = "#3d754b";
-        dark = "#102718";
-    }
-
-    if (selectedSnake === "anaconda") {
-        light = "#8fa866";
-        middle = "#49623a";
-        dark = "#182516";
-    }
-
-    if (selectedSnake === "kingcobra") {
-        light = "#d0b967";
-        middle = "#76632d";
-        dark = "#211b09";
-    }
-
-    if (selectedSnake === "albino") {
-        light = "#ffe9d2";
-        middle = "#d88d86";
-        dark = "#713941";
-    }
-
-    // -----------------------------
-    // GÖLGE
-    // -----------------------------
-
-    ctx.save();
-
-    ctx.translate(4, 7);
-
-    ctx.strokeStyle = "rgba(0,0,0,.45)";
-    ctx.lineWidth =
-        selectedSnake === "anaconda" ? 28 : 24;
-
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
-
-    drawSmoothSnakePath();
-
-    ctx.stroke();
-
-    ctx.restore();
-
-    // -----------------------------
-    // ANA 3D GÖVDE
-    // -----------------------------
-
-    const bodyGradient = ctx.createLinearGradient(
-        0,
-        0,
-        0,
-        400
-    );
-
-    bodyGradient.addColorStop(0, light);
-    bodyGradient.addColorStop(.28, middle);
-    bodyGradient.addColorStop(.72, dark);
-    bodyGradient.addColorStop(1, "#050805");
-
-    ctx.strokeStyle = bodyGradient;
-
-    ctx.lineWidth =
-        selectedSnake === "anaconda" ? 25 :
-        selectedSnake === "cobra" ? 22 :
-        21;
-
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
-
-    drawSmoothSnakePath();
-
-    ctx.stroke();
-
-    // -----------------------------
-    // ÜST PARLAKLIK
-    // -----------------------------
-
-    ctx.strokeStyle = "rgba(255,255,255,.22)";
-    ctx.lineWidth = 4;
-    ctx.lineCap = "round";
-
-    drawSmoothSnakePath();
-
-    ctx.stroke();
-
-    // -----------------------------
-    // PULLAR
-    // -----------------------------
-
-    for (let i = 1; i < snake.length; i++) {
-
-        const x = snake[i].x + grid / 2;
-        const y = snake[i].y + grid / 2;
-
-        ctx.fillStyle =
-            selectedSnake === "albino"
-                ? "rgba(255,245,235,.30)"
-                : "rgba(20,15,10,.32)";
-
-        ctx.beginPath();
-
-        ctx.arc(
+        ctx.drawImage(
+            img,
             x,
-            y - 3,
-            3.2,
-            0,
-            Math.PI * 2
+            y,
+            size,
+            size
         );
-
-        ctx.fill();
-
-        // küçük parlak nokta
-        ctx.fillStyle = "rgba(255,255,255,.18)";
-
-        ctx.beginPath();
-
-        ctx.arc(
-            x - 1,
-            y - 4,
-            1.2,
-            0,
-            Math.PI * 2
-        );
-
-        ctx.fill();
     }
 
-    // -----------------------------
-    // ALT GÖLGE
-    // -----------------------------
 
-    ctx.strokeStyle = "rgba(0,0,0,.25)";
-    ctx.lineWidth = 3;
+    function getDirection(a, b) {
 
-    drawSmoothSnakePath();
+        return {
+            x: Math.sign(b.x - a.x),
+            y: Math.sign(b.y - a.y)
+        };
+    }
 
-    ctx.stroke();
 
-    ctx.restore();
+    // KUYRUKTAN BAŞA DOĞRU ÇİZ
+    // Böylece kafa gövdenin üzerinde kalır.
 
-    // KAFAYI EN ÜSTE ÇİZ
-    drawSnakeHead();
+    for (let i = snake.length - 1; i >= 0; i--) {
+
+        const part = snake[i];
+
+
+        // ==========================================
+        // KAFA
+        // ==========================================
+
+        if (i === 0) {
+
+            if (direction.x > 0) {
+                drawSprite(
+                    snakeSprites.head.right,
+                    part
+                );
+            }
+
+            else if (direction.x < 0) {
+                drawSprite(
+                    snakeSprites.head.left,
+                    part
+                );
+            }
+
+            else if (direction.y < 0) {
+                drawSprite(
+                    snakeSprites.head.up,
+                    part
+                );
+            }
+
+            else {
+                drawSprite(
+                    snakeSprites.head.down,
+                    part
+                );
+            }
+
+            continue;
+        }
+
+
+        // ==========================================
+        // KUYRUK
+        // ==========================================
+
+        if (i === snake.length - 1) {
+
+            const previous =
+                snake[i - 1];
+
+            const d =
+                getDirection(part, previous);
+
+
+            if (d.x > 0) {
+
+                drawSprite(
+                    snakeSprites.tail.right,
+                    part
+                );
+
+            } else if (d.x < 0) {
+
+                drawSprite(
+                    snakeSprites.tail.left,
+                    part
+                );
+
+            } else if (d.y < 0) {
+
+                drawSprite(
+                    snakeSprites.tail.up,
+                    part
+                );
+
+            } else {
+
+                drawSprite(
+                    snakeSprites.tail.down,
+                    part
+                );
+            }
+
+            continue;
+        }
+
+
+        // ==========================================
+        // GÖVDE / DÖNÜŞ
+        // ==========================================
+
+        const previous =
+            snake[i - 1];
+
+        const next =
+            snake[i + 1];
+
+        const d1 =
+            getDirection(part, previous);
+
+        const d2 =
+            getDirection(part, next);
+
+
+        const horizontal =
+            d1.y === 0 &&
+            d2.y === 0;
+
+        const vertical =
+            d1.x === 0 &&
+            d2.x === 0;
+
+
+        // DÜZ GÖVDE
+        if (horizontal || vertical) {
+
+            drawSprite(
+                snakeSprites.body,
+                part
+            );
+
+            continue;
+        }
+
+
+        // ==========================================
+        // DÖNÜŞLER
+        // ==========================================
+
+        let turnImage =
+            snakeSprites.turn.tr;
+
+
+        // YUKARI + SAĞ
+        if (
+            (d1.y < 0 && d2.x > 0) ||
+            (d2.y < 0 && d1.x > 0)
+        ) {
+
+            turnImage =
+                snakeSprites.turn.tr;
+        }
+
+
+        // YUKARI + SOL
+        else if (
+            (d1.y < 0 && d2.x < 0) ||
+            (d2.y < 0 && d1.x < 0)
+        ) {
+
+            turnImage =
+                snakeSprites.turn.tl;
+        }
+
+
+        // AŞAĞI + SAĞ
+        else if (
+            (d1.y > 0 && d2.x > 0) ||
+            (d2.y > 0 && d1.x > 0)
+        ) {
+
+            turnImage =
+                snakeSprites.turn.br;
+        }
+
+
+        // AŞAĞI + SOL
+        else if (
+            (d1.y > 0 && d2.x < 0) ||
+            (d2.y > 0 && d1.x < 0)
+        ) {
+
+            turnImage =
+                snakeSprites.turn.bl;
+        }
+
+
+        drawSprite(
+            turnImage,
+            part
+        );
+    }
 }
-
 // =====================================================
 // YEM
 // =====================================================
