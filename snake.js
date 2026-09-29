@@ -1139,7 +1139,7 @@ function drawSnake3D() {
 
     if (!snake || snake.length === 0) return;
 
-    const size = grid * 1.8;
+    const size = grid;
 
     function drawSprite(img, part) {
 
