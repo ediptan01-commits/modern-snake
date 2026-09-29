@@ -1139,256 +1139,259 @@ function drawSnake3D() {
 
     if (!snake || snake.length === 0) return;
 
-    const size = grid * 1.8;
+    // ==========================================
+    // KAFA / KUYRUK GÖRSELİ
+    // ==========================================
 
-   
-function drawSprite(img, part, angle = 0) {
+    function drawSprite(img, part, spriteSize) {
 
-    if (!img || !img.complete || img.naturalWidth === 0) {
-        return;
-    }
+        if (!img || !img.complete || img.naturalWidth === 0) {
+            return;
+        }
 
-    let spriteSize = size;
+        const x = part.x + grid / 2;
+        const y = part.y + grid / 2;
 
-    // KAFA DAHA BÜYÜK
-    if (
-        img === snakeSprites.head.up ||
-        img === snakeSprites.head.right ||
-        img === snakeSprites.head.down ||
-        img === snakeSprites.head.left
-    ) {
-        spriteSize = grid * 2.5;
-    }
+        ctx.save();
 
-    const x = part.x + grid / 2;
-    const y = part.y + grid / 2;
+        ctx.translate(x, y);
 
-    ctx.save();
+        ctx.drawImage(
+            img,
+            -spriteSize / 2,
+            -spriteSize / 2,
+            spriteSize,
+            spriteSize
+        );
 
-    ctx.translate(x, y);
-    ctx.rotate(angle);
-
-    ctx.drawImage(
-        img,
-        -spriteSize / 2,
-        -spriteSize / 2,
-        spriteSize,
-        spriteSize
-    );
-
-    ctx.restore();
-}
-    
-    function getDirection(a, b) {
-
-        return {
-            x: Math.sign(b.x - a.x),
-            y: Math.sign(b.y - a.y)
-        };
+        ctx.restore();
     }
 
 
-    // KUYRUKTAN BAŞA DOĞRU ÇİZ
-    // Böylece kafa gövdenin üzerinde kalır.
+    // ==========================================
+    // SÜREKLİ GÖVDE
+    // ==========================================
 
-    for (let i = snake.length - 1; i >= 0; i--) {
+    if (snake.length >= 2) {
 
-        const part = snake[i];
+        const points = snake.map(part => ({
+            x: part.x + grid / 2,
+            y: part.y + grid / 2
+        }));
+
+        const path = new Path2D();
+
+        path.moveTo(
+            points[0].x,
+            points[0].y
+        );
 
 
-        // ==========================================
-        // KAFA
-        // ==========================================
+        // Yumuşak kıvrımlı yol
+        for (let i = 1; i < points.length - 1; i++) {
 
-        if (i === 0) {
+            const current = points[i];
+            const next = points[i + 1];
 
-            if (direction.x > 0) {
-                drawSprite(
-                    snakeSprites.head.right,
-                    part
-                );
-            }
+            const midX =
+                (current.x + next.x) / 2;
 
-            else if (direction.x < 0) {
-                drawSprite(
-                    snakeSprites.head.left,
-                    part
-                );
-            }
+            const midY =
+                (current.y + next.y) / 2;
 
-            else if (direction.y < 0) {
-                drawSprite(
-                    snakeSprites.head.up,
-                    part
-                );
-            }
-
-            else {
-                drawSprite(
-                    snakeSprites.head.down,
-                    part
-                );
-            }
-
-            continue;
+            path.quadraticCurveTo(
+                current.x,
+                current.y,
+                midX,
+                midY
+            );
         }
 
 
-        // ==========================================
-        // KUYRUK
-        // ==========================================
+        const last =
+            points[points.length - 1];
 
-        if (i === snake.length - 1) {
-
-            const previous =
-                snake[i - 1];
-
-            const d =
-                getDirection(part, previous);
+        path.lineTo(
+            last.x,
+            last.y
+        );
 
 
-            if (d.x > 0) {
+        // ======================================
+        // ANA GÖVDE
+        // ======================================
 
-                drawSprite(
-                    snakeSprites.tail.right,
-                    part
+        ctx.save();
+
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+
+        ctx.lineWidth = grid * 1.35;
+
+
+        const bodyGradient =
+            ctx.createLinearGradient(
+                0,
+                0,
+                canvas.width,
+                canvas.height
+            );
+
+        bodyGradient.addColorStop(
+            0,
+            "#9bea22"
+        );
+
+        bodyGradient.addColorStop(
+            0.3,
+            "#54c916"
+        );
+
+        bodyGradient.addColorStop(
+            0.65,
+            "#21930d"
+        );
+
+        bodyGradient.addColorStop(
+            1,
+            "#0b5b08"
+        );
+
+
+        ctx.strokeStyle =
+            bodyGradient;
+
+        ctx.stroke(path);
+
+
+        // ======================================
+        // GÖVDE DOKUSU
+        // ======================================
+
+        if (
+            snakeSprites.body &&
+            snakeSprites.body.complete &&
+            snakeSprites.body.naturalWidth > 0
+        ) {
+
+            const pattern =
+                ctx.createPattern(
+                    snakeSprites.body,
+                    "repeat"
                 );
 
-            } else if (d.x < 0) {
+            if (pattern) {
 
-                drawSprite(
-                    snakeSprites.tail.left,
-                    part
-                );
+                ctx.lineWidth =
+                    grid * 1.05;
 
-            } else if (d.y < 0) {
+                ctx.strokeStyle =
+                    pattern;
 
-                drawSprite(
-                    snakeSprites.tail.up,
-                    part
-                );
-
-            } else {
-
-                drawSprite(
-                    snakeSprites.tail.down,
-                    part
-                );
+                ctx.stroke(path);
             }
-
-            continue;
         }
 
 
-        // ==========================================
-        // GÖVDE / DÖNÜŞ
-        // ==========================================
+        ctx.restore();
+    }
+
+
+    // ==========================================
+    // KUYRUK
+    // ==========================================
+
+    if (snake.length >= 2) {
+
+        const tail =
+            snake[snake.length - 1];
 
         const previous =
-            snake[i - 1];
+            snake[snake.length - 2];
 
-        const next =
-            snake[i + 1];
+        const dx =
+            previous.x - tail.x;
 
-        const d1 =
-            getDirection(part, previous);
+        const dy =
+            previous.y - tail.y;
 
-        const d2 =
-            getDirection(part, next);
-
-
-        const horizontal =
-            d1.y === 0 &&
-            d2.y === 0;
-
-        const vertical =
-            d1.x === 0 &&
-            d2.x === 0;
+        let tailImage =
+            snakeSprites.tail.right;
 
 
-        // DÜZ GÖVDE
-       
-    if (horizontal || vertical) {
+        if (dx > 0) {
 
-    let angle = 0;
+            tailImage =
+                snakeSprites.tail.right;
 
-    // DİKEY GÖVDE
-    if (vertical) {
-        angle = 0;
-    }
+        } else if (dx < 0) {
 
-    // YATAY GÖVDE
-    if (horizontal) {
-        angle = Math.PI / 2;
-    }
+            tailImage =
+                snakeSprites.tail.left;
 
-    drawSprite(
-        snakeSprites.body,
-        part,
-        angle
-    );
+        } else if (dy < 0) {
 
-    continue;
-}
+            tailImage =
+                snakeSprites.tail.up;
 
-        // ==========================================
-        // DÖNÜŞLER
-        // ==========================================
+        } else {
 
-        let turnImage =
-            snakeSprites.turn.tr;
-
-
-        // YUKARI + SAĞ
-        if (
-            (d1.y < 0 && d2.x > 0) ||
-            (d2.y < 0 && d1.x > 0)
-        ) {
-
-            turnImage =
-                snakeSprites.turn.tr;
-        }
-
-
-        // YUKARI + SOL
-        else if (
-            (d1.y < 0 && d2.x < 0) ||
-            (d2.y < 0 && d1.x < 0)
-        ) {
-
-            turnImage =
-                snakeSprites.turn.tl;
-        }
-
-
-        // AŞAĞI + SAĞ
-        else if (
-            (d1.y > 0 && d2.x > 0) ||
-            (d2.y > 0 && d1.x > 0)
-        ) {
-
-            turnImage =
-                snakeSprites.turn.br;
-        }
-
-
-        // AŞAĞI + SOL
-        else if (
-            (d1.y > 0 && d2.x < 0) ||
-            (d2.y > 0 && d1.x < 0)
-        ) {
-
-            turnImage =
-                snakeSprites.turn.bl;
+            tailImage =
+                snakeSprites.tail.down;
         }
 
 
         drawSprite(
-            turnImage,
-            part
+            tailImage,
+            tail,
+            grid * 1.5
+        );
+    }
+
+
+    // ==========================================
+    // KAFA
+    // ==========================================
+
+    const head =
+        snake[0];
+
+    if (head) {
+
+        let headImage =
+            snakeSprites.head.right;
+
+
+        if (direction.x > 0) {
+
+            headImage =
+                snakeSprites.head.right;
+
+        } else if (direction.x < 0) {
+
+            headImage =
+                snakeSprites.head.left;
+
+        } else if (direction.y < 0) {
+
+            headImage =
+                snakeSprites.head.up;
+
+        } else {
+
+            headImage =
+                snakeSprites.head.down;
+        }
+
+
+        drawSprite(
+            headImage,
+            head,
+            grid * 2.5
         );
     }
 }
+
 // =====================================================
 // YEM
 // =====================================================
