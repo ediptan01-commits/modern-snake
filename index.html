@@ -1,8 +1,14 @@
 <!DOCTYPE html>
 <html lang="tr">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    >
+
     <title>Modern Snake</title>
 
     <link rel="stylesheet" href="style.css">
@@ -12,17 +18,170 @@
 
     <div class="game-container">
 
-        <h1>MODERN SNAKE</h1>
+        <!-- ÜST BAR -->
+        <div class="top-bar">
 
-        <div id="score">Skor: 0</div>
+            <button class="icon-button">
+                ⚙️
+            </button>
 
-        <div id="game"></div>
+            <h1>
+                <span>MODERN</span>
+                <strong>SNAKE</strong>
+            </h1>
 
-        <button id="startButton">OYNA</button>
+            <button class="icon-button">
+                👑
+            </button>
+
+        </div>
+
+
+        <!-- BİLGİ KARTLARI -->
+        <div class="stats">
+
+            <div class="stat-card">
+                <div class="stat-icon">🏆</div>
+
+                <div>
+                    <small>Skor</small>
+
+                    <!-- snake.js bunu kullanıyor -->
+                    <div id="score">
+                        Skor: 0
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="stat-card">
+                <div class="stat-icon">🪙</div>
+
+                <div>
+                    <small>Coin</small>
+
+                    <div id="coinDisplay">
+                        0
+                    </div>
+                </div>
+
+                <button class="plus-button">
+                    +
+                </button>
+            </div>
+
+
+            <div class="stat-card">
+                <div class="stat-icon">📊</div>
+
+                <div>
+                    <small>Seviye</small>
+
+                    <div id="levelDisplay">
+                        1
+                    </div>
+
+                    <div class="level-bar">
+                        <div class="level-progress"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
+        <!-- ARENA -->
+        <div class="arena-selector">
+
+            <button class="arena-arrow">
+                ‹
+            </button>
+
+            <div class="arena-info">
+
+                <div class="arena-image">
+                    🌿
+                </div>
+
+                <div>
+                    <strong>
+                        ORMAN ARENASI
+                    </strong>
+
+                    <small>
+                        Doğanın içinde macera
+                    </small>
+                </div>
+
+            </div>
+
+            <button class="arena-arrow">
+                ›
+            </button>
+
+        </div>
+
+
+        <!-- OYUN ALANI -->
+        <div class="game-frame">
+
+            <!-- snake.js bunu kullanıyor -->
+            <div id="game"></div>
+
+        </div>
+
+
+        <!-- OYNA BUTONU -->
+        <button id="startButton" class="play-button">
+            ▶ OYNA
+        </button>
+
+
+        <!-- ALT BUTONLAR -->
+        <div class="action-buttons">
+
+            <button class="action-card">
+                ⭐
+                <span>GÖREVLER</span>
+            </button>
+
+            <button class="action-card">
+                🎁
+                <span>GÜNLÜK ÖDÜL</span>
+            </button>
+
+        </div>
+
+
+        <!-- ALT MENÜ -->
+        <div class="bottom-menu">
+
+            <button class="menu-item active">
+                🌳
+                <span>ARENALAR</span>
+            </button>
+
+            <button
+                class="menu-item"
+                id="snakesMenuButton"
+            >
+                🐍
+                <span>YILANLAR</span>
+            </button>
+
+            <button class="menu-item">
+                🏪
+                <span>MAĞAZA</span>
+            </button>
+
+        </div>
 
     </div>
 
-    
-<script src="snake.js"></script>
+
+    <!-- OYUN KODU -->
+    <script src="snake.js"></script>
+
 </body>
+
 </html>
