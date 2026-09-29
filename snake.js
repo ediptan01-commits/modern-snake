@@ -1139,45 +1139,22 @@ function drawSnake3D() {
 
     if (!snake || snake.length === 0) return;
 
-    // ==========================================
-    // KAFA / KUYRUK GÖRSELİ
-    // ==========================================
 
-    function drawSprite(img, part, spriteSize) {
+    // =================================================
+    // GÖVDE NOKTALARINI AL
+    // =================================================
 
-        if (!img || !img.complete || img.naturalWidth === 0) {
-            return;
-        }
-
-        const x = part.x + grid / 2;
-        const y = part.y + grid / 2;
-
-        ctx.save();
-
-        ctx.translate(x, y);
-
-        ctx.drawImage(
-            img,
-            -spriteSize / 2,
-            -spriteSize / 2,
-            spriteSize,
-            spriteSize
-        );
-
-        ctx.restore();
-    }
+    const points = snake.map(part => ({
+        x: part.x + grid / 2,
+        y: part.y + grid / 2
+    }));
 
 
-    // ==========================================
-    // SÜREKLİ GÖVDE
-    // ==========================================
+    // =================================================
+    // YUMUŞAK GÖVDE YOLU
+    // =================================================
 
-    if (snake.length >= 2) {
-
-        const points = snake.map(part => ({
-            x: part.x + grid / 2,
-            y: part.y + grid / 2
-        }));
+    if (points.length >= 2) {
 
         const path = new Path2D();
 
@@ -1187,21 +1164,20 @@ function drawSnake3D() {
         );
 
 
-        // Yumuşak kıvrımlı yol
         for (let i = 1; i < points.length - 1; i++) {
 
-            const current = points[i];
-            const next = points[i + 1];
+            const p = points[i];
+            const n = points[i + 1];
 
             const midX =
-                (current.x + next.x) / 2;
+                (p.x + n.x) / 2;
 
             const midY =
-                (current.y + next.y) / 2;
+                (p.y + n.y) / 2;
 
             path.quadraticCurveTo(
-                current.x,
-                current.y,
+                p.x,
+                p.y,
                 midX,
                 midY
             );
@@ -1217,44 +1193,49 @@ function drawSnake3D() {
         );
 
 
-        // ======================================
+        // =================================================
         // ANA GÖVDE
-        // ======================================
+        // =================================================
 
         ctx.save();
 
         ctx.lineCap = "round";
         ctx.lineJoin = "round";
 
-        ctx.lineWidth = grid * 1.35;
+        ctx.lineWidth = grid * 1.15;
 
 
         const bodyGradient =
             ctx.createLinearGradient(
                 0,
+                -20,
                 0,
-                canvas.width,
-                canvas.height
+                20
             );
 
         bodyGradient.addColorStop(
             0,
-            "#9bea22"
+            "#b9f542"
         );
 
         bodyGradient.addColorStop(
-            0.3,
-            "#54c916"
+            0.25,
+            "#72d51d"
         );
 
         bodyGradient.addColorStop(
-            0.65,
-            "#21930d"
+            0.55,
+            "#35a914"
+        );
+
+        bodyGradient.addColorStop(
+            0.8,
+            "#187b0b"
         );
 
         bodyGradient.addColorStop(
             1,
-            "#0b5b08"
+            "#084d08"
         );
 
 
@@ -1264,40 +1245,26 @@ function drawSnake3D() {
         ctx.stroke(path);
 
 
-        // ======================================
-// YILAN PARLAKLIK / 3D GÖRÜNÜM
-// ======================================
+        // =================================================
+        // GÖVDE PARLAKLIĞI
+        // =================================================
 
-ctx.save();
+        ctx.lineWidth =
+            grid * 0.28;
 
-ctx.lineCap = "round";
-ctx.lineJoin = "round";
+        ctx.strokeStyle =
+            "rgba(220,255,120,0.45)";
 
-ctx.lineWidth = grid * 0.42;
-
-const shineGradient = ctx.createLinearGradient(
-    0,
-    0,
-    canvas.width,
-    canvas.height
-);
-
-shineGradient.addColorStop(0, "rgba(210,255,90,0.9)");
-shineGradient.addColorStop(0.4, "rgba(120,235,35,0.45)");
-shineGradient.addColorStop(1, "rgba(0,80,0,0.15)");
-
-ctx.strokeStyle = shineGradient;
-
-ctx.stroke(path);
-
-ctx.restore();
-
-}
+        ctx.stroke(path);
 
 
-    // ==========================================
+        ctx.restore();
+    }
+
+
+    // =================================================
     // KUYRUK
-    // ==========================================
+    // =================================================
 
     if (snake.length >= 2) {
 
@@ -1307,14 +1274,15 @@ ctx.restore();
         const previous =
             snake[snake.length - 2];
 
+
         const dx =
             previous.x - tail.x;
 
         const dy =
             previous.y - tail.y;
 
-        let tailImage =
-            snakeSprites.tail.right;
+
+        let tailImage;
 
 
         if (dx > 0) {
@@ -1339,56 +1307,95 @@ ctx.restore();
         }
 
 
-        drawSprite(
-            tailImage,
-            tail,
-            grid * 1.5
-        );
+        if (
+            tailImage.complete &&
+            tailImage.naturalWidth > 0
+        ) {
+
+            const size =
+                grid * 1.5;
+
+
+            ctx.drawImage(
+                tailImage,
+
+                tail.x +
+                    grid / 2 -
+                    size / 2,
+
+                tail.y +
+                    grid / 2 -
+                    size / 2,
+
+                size,
+                size
+            );
+        }
     }
 
 
-    // ==========================================
+    // =================================================
     // KAFA
-    // ==========================================
+    // =================================================
 
     const head =
         snake[0];
 
-    if (head) {
 
-        let headImage =
+    if (!head) return;
+
+
+    let headImage;
+
+
+    if (direction.x > 0) {
+
+        headImage =
             snakeSprites.head.right;
 
+    } else if (direction.x < 0) {
 
-        if (direction.x > 0) {
+        headImage =
+            snakeSprites.head.left;
 
-            headImage =
-                snakeSprites.head.right;
+    } else if (direction.y < 0) {
 
-        } else if (direction.x < 0) {
+        headImage =
+            snakeSprites.head.up;
 
-            headImage =
-                snakeSprites.head.left;
+    } else {
 
-        } else if (direction.y < 0) {
-
-            headImage =
-                snakeSprites.head.up;
-
-        } else {
-
-            headImage =
-                snakeSprites.head.down;
-        }
+        headImage =
+            snakeSprites.head.down;
+    }
 
 
-        drawSprite(
+    if (
+        headImage.complete &&
+        headImage.naturalWidth > 0
+    ) {
+
+        const headSize =
+            grid * 2.5;
+
+
+        ctx.drawImage(
             headImage,
-            head,
-            grid * 2.5
+
+            head.x +
+                grid / 2 -
+                headSize / 2,
+
+            head.y +
+                grid / 2 -
+                headSize / 2,
+
+            headSize,
+            headSize
         );
     }
 }
+
 
 // =====================================================
 // YEM
