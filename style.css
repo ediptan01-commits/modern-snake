@@ -1,79 +1,508 @@
 * {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
+    width: 100%;
+    min-height: 100%;
+    font-family: Arial, sans-serif;
+    background:
+        radial-gradient(circle at top, #12345a 0%, #06101f 45%, #020711 100%);
+    color: white;
 }
 
 body {
-    min-height: 100vh;
-    background:
-        radial-gradient(circle at top, #14213d, #05070d 70%);
-    color: white;
-    font-family: Arial, sans-serif;
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    overflow: hidden;
+    overflow-x: hidden;
 }
 
 .game-container {
     width: 100%;
-    max-width: 450px;
+    max-width: 900px;
+    min-height: 100vh;
+    margin: auto;
+    padding: 18px 16px 25px;
+}
+
+
+/* =========================
+   ÜST BAR
+========================= */
+
+.top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+.top-bar h1 {
+    margin: 0;
     text-align: center;
-    padding: 15px;
+    line-height: .85;
+    font-size: clamp(32px, 9vw, 62px);
+    font-weight: 1000;
+    letter-spacing: 2px;
+    text-shadow:
+        0 4px 0 #14649b,
+        0 0 20px rgba(0, 190, 255, .7);
 }
 
-h1 {
-    font-size: 34px;
-    letter-spacing: 5px;
-    margin-bottom: 8px;
+.top-bar h1 span {
+    display: block;
+    color: white;
 }
 
-#score {
-    font-size: 20px;
-    font-weight: bold;
-    color: #00e5ff;
+.top-bar h1 strong {
+    display: block;
+    margin-top: 7px;
+    color: #ffb51b;
+    text-shadow:
+        0 4px 0 #b94800,
+        0 0 18px rgba(255, 170, 0, .7);
+}
+
+.icon-button {
+    width: 58px;
+    height: 58px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    border: 2px solid #315e8e;
+    background: rgba(7, 25, 49, .9);
+    color: white;
+    font-size: 27px;
+    box-shadow:
+        inset 0 0 15px rgba(0, 170, 255, .15),
+        0 5px 20px rgba(0, 0, 0, .35);
+}
+
+
+/* =========================
+   BİLGİ KARTLARI
+========================= */
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
     margin-bottom: 15px;
 }
 
-#game {
+.stat-card {
+    min-height: 78px;
+    padding: 10px;
     display: flex;
-    justify-content: center;
-}
+    align-items: center;
+    gap: 8px;
+    position: relative;
 
-canvas {
-    width: min(92vw, 400px);
-    height: min(92vw, 400px);
+    border: 1px solid #17649a;
+    border-radius: 20px;
 
-    border: 2px solid #00e5ff;
-    border-radius: 18px;
+    background:
+        linear-gradient(
+            145deg,
+            rgba(12, 43, 76, .95),
+            rgba(4, 19, 38, .95)
+        );
 
     box-shadow:
-        0 0 20px rgba(0, 229, 255, 0.25),
-        inset 0 0 30px rgba(0, 229, 255, 0.05);
+        inset 0 0 18px rgba(0, 160, 255, .08),
+        0 7px 20px rgba(0, 0, 0, .3);
 }
 
-button {
-    margin-top: 18px;
+.stat-icon {
+    font-size: 28px;
+}
 
-    border: none;
+.stat-card small {
+    display: block;
+    color: #7ebce5;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.stat-card #score,
+.stat-card #coinDisplay,
+.stat-card #levelDisplay {
+    margin: 2px 0 0;
+    color: white;
+    font-size: 25px;
+    font-weight: 900;
+}
+
+.plus-button {
+    width: 32px;
+    height: 32px;
+    margin-left: auto;
+    border: 0;
+    border-radius: 50%;
+    background: #35e875;
+    color: #063d1d;
+    font-size: 24px;
+    font-weight: 900;
+}
+
+.level-bar {
+    width: 65px;
+    height: 7px;
+    margin-top: 4px;
+    border-radius: 10px;
+    background: #183552;
+    overflow: hidden;
+}
+
+.level-progress {
+    width: 45%;
+    height: 100%;
+    border-radius: inherit;
+    background: #38ef78;
+    box-shadow: 0 0 10px #38ef78;
+}
+
+
+/* =========================
+   ARENA
+========================= */
+
+.arena-selector {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 12px 0;
+}
+
+.arena-info {
+    flex: 1;
+    min-height: 70px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 13px;
+
+    border: 1px solid #19598a;
+    border-radius: 22px;
+
+    background:
+        linear-gradient(
+            100deg,
+            rgba(10, 37, 65, .98),
+            rgba(5, 22, 41, .96)
+        );
+}
+
+.arena-image {
+    width: 55px;
+    height: 55px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+
+    border-radius: 15px;
+    background:
+        linear-gradient(135deg, #24733c, #0a321f);
+
+    font-size: 31px;
+}
+
+.arena-info strong {
+    display: block;
+    font-size: 17px;
+}
+
+.arena-info small {
+    display: block;
+    margin-top: 5px;
+    color: #7da8c7;
+    font-size: 12px;
+}
+
+.arena-arrow {
+    width: 48px;
+    height: 58px;
+    flex-shrink: 0;
+
+    border: 1px solid #246b9d;
+    border-radius: 18px;
+
+    background: #092442;
+    color: white;
+    font-size: 42px;
+    line-height: 1;
+}
+
+
+/* =========================
+   OYUN ALANI
+========================= */
+
+.game-frame {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+
+    padding: 4px;
+
     border-radius: 30px;
 
-    padding: 15px 45px;
+    background:
+        linear-gradient(
+            135deg,
+            #12e8ff,
+            #0878ba,
+            #13e6ff
+        );
 
-    background: #00e5ff;
-    color: #001014;
-
-    font-size: 18px;
-    font-weight: bold;
-
-    cursor: pointer;
-
-    box-shadow: 0 0 20px rgba(0, 229, 255, 0.35);
+    box-shadow:
+        0 0 25px rgba(0, 224, 255, .45),
+        0 12px 40px rgba(0, 0, 0, .45);
 }
 
-button:active {
-    transform: scale(0.94);
+#game {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+
+    border-radius: 26px;
+
+    background:
+        radial-gradient(
+            circle at center,
+            #183b32,
+            #071a1c 75%
+        );
+}
+
+
+/* =========================
+   OYNA
+========================= */
+
+#startButton {
+    display: block;
+
+    width: min(90%, 470px);
+    min-height: 70px;
+
+    margin: 18px auto 12px;
+
+    border: 0;
+    border-radius: 40px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #76ff4c,
+            #16e86a
+        );
+
+    color: #063817;
+
+    font-size: 25px;
+    font-weight: 1000;
+
+    box-shadow:
+        0 0 25px rgba(55, 255, 110, .55),
+        inset 0 2px 0 rgba(255, 255, 255, .55);
+
+    cursor: pointer;
+}
+
+
+/* =========================
+   GÖREV / ÖDÜL
+========================= */
+
+.action-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.action-card {
+    min-height: 75px;
+
+    border: 1px solid #1d6090;
+    border-radius: 22px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #102f50,
+            #071a31
+        );
+
+    color: white;
+
+    font-size: 27px;
+    font-weight: 900;
+
+    box-shadow:
+        0 7px 20px rgba(0, 0, 0, .3);
+}
+
+.action-card span {
+    display: block;
+    margin-top: 5px;
+    font-size: 13px;
+}
+
+
+/* =========================
+   ALT MENÜ
+========================= */
+
+.bottom-menu {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+
+    margin-top: 18px;
+    padding: 8px;
+
+    border: 1px solid #215a8b;
+    border-radius: 28px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #102d4c,
+            #07172d
+        );
+
+    box-shadow:
+        0 10px 30px rgba(0, 0, 0, .4);
+}
+
+.menu-item {
+    min-height: 78px;
+
+    position: relative;
+
+    border: 0;
+    border-radius: 20px;
+
+    background: transparent;
+    color: white;
+
+    font-size: 28px;
+}
+
+.menu-item span {
+    display: block;
+    margin-top: 5px;
+    font-size: 13px;
+    font-weight: 900;
+}
+
+.menu-item.active {
+    color: #6aff6e;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(42, 255, 100, .18),
+            transparent 70%
+        );
+}
+
+.menu-item.active::after {
+    content: "";
+
+    position: absolute;
+    left: 22%;
+    right: 22%;
+    bottom: 2px;
+
+    height: 5px;
+
+    border-radius: 10px;
+
+    background: #68ff6b;
+    box-shadow: 0 0 12px #68ff6b;
+}
+
+
+/* =========================
+   MOBİL
+========================= */
+
+@media (max-width: 500px) {
+
+    .game-container {
+        padding: 14px 10px 20px;
+    }
+
+    .icon-button {
+        width: 48px;
+        height: 48px;
+        font-size: 23px;
+    }
+
+    .stats {
+        gap: 7px;
+    }
+
+    .stat-card {
+        min-height: 70px;
+        padding: 7px;
+        border-radius: 16px;
+    }
+
+    .stat-icon {
+        font-size: 22px;
+    }
+
+    .stat-card #score,
+    .stat-card #coinDisplay,
+    .stat-card #levelDisplay {
+        font-size: 19px;
+    }
+
+    .stat-card small {
+        font-size: 11px;
+    }
+
+    .plus-button {
+        width: 27px;
+        height: 27px;
+        font-size: 19px;
+    }
+
+    .arena-arrow {
+        width: 40px;
+        height: 52px;
+        font-size: 34px;
+    }
+
+    .arena-info {
+        min-height: 64px;
+    }
+
+    .arena-image {
+        width: 48px;
+        height: 48px;
+        font-size: 26px;
+    }
+
+    #startButton {
+        min-height: 62px;
+        font-size: 22px;
+    }
+
+    .bottom-menu {
+        margin-top: 14px;
+    }
+
+    .menu-item {
+        min-height: 68px;
+        font-size: 24px;
+    }
+
+    .menu-item span {
+        font-size: 11px;
+    }
 }
