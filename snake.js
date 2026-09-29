@@ -1142,7 +1142,7 @@ function drawSnake3D() {
     const size = grid;
 
    
-function drawSprite(img, part) {
+function drawSprite(img, part, angle = 0) {
 
     if (!img || !img.complete || img.naturalWidth === 0) {
         return;
@@ -1160,18 +1160,25 @@ function drawSprite(img, part) {
         spriteSize = grid * 2.5;
     }
 
-    const x = part.x + grid / 2 - spriteSize / 2;
-    const y = part.y + grid / 2 - spriteSize / 2;
+    const x = part.x + grid / 2;
+    const y = part.y + grid / 2;
+
+    ctx.save();
+
+    ctx.translate(x, y);
+    ctx.rotate(angle);
 
     ctx.drawImage(
         img,
-        x,
-        y,
+        -spriteSize / 2,
+        -spriteSize / 2,
         spriteSize,
         spriteSize
     );
-}
 
+    ctx.restore();
+}
+    
     function getDirection(a, b) {
 
         return {
@@ -1300,16 +1307,29 @@ function drawSprite(img, part) {
 
 
         // DÜZ GÖVDE
-        if (horizontal || vertical) {
+       
+    if (horizontal || vertical) {
 
-            drawSprite(
-                snakeSprites.body,
-                part
-            );
+    let angle = 0;
 
-            continue;
-        }
+    // DİKEY GÖVDE
+    if (vertical) {
+        angle = 0;
+    }
 
+    // YATAY GÖVDE
+    if (horizontal) {
+        angle = Math.PI / 2;
+    }
+
+    drawSprite(
+        snakeSprites.body,
+        part,
+        angle
+    );
+
+    continue;
+}
 
         // ==========================================
         // DÖNÜŞLER
