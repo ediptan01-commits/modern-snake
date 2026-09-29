@@ -18,7 +18,7 @@ game.appendChild(canvas);
 const ctx = canvas.getContext("2d");
 
 const forestArenaImage = new Image();
-forestArenaImage.src = "forest-arena.svg";
+forestArenaImage.src = "forest-arena.png";
 
 const grid = 20;
 
