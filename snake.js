@@ -1265,36 +1265,34 @@ function drawSnake3D() {
 
 
         // ======================================
-        // GÖVDE DOKUSU
-        // ======================================
+// YILAN PARLAKLIK / 3D GÖRÜNÜM
+// ======================================
 
-        if (
-            snakeSprites.body &&
-            snakeSprites.body.complete &&
-            snakeSprites.body.naturalWidth > 0
-        ) {
+ctx.save();
 
-            const pattern =
-                ctx.createPattern(
-                    snakeSprites.body,
-                    "repeat"
-                );
+ctx.lineCap = "round";
+ctx.lineJoin = "round";
 
-            if (pattern) {
+ctx.lineWidth = grid * 0.42;
 
-                ctx.lineWidth =
-                    grid * 1.05;
+const shineGradient = ctx.createLinearGradient(
+    0,
+    0,
+    canvas.width,
+    canvas.height
+);
 
-                ctx.strokeStyle =
-                    pattern;
+shineGradient.addColorStop(0, "rgba(210,255,90,0.9)");
+shineGradient.addColorStop(0.4, "rgba(120,235,35,0.45)");
+shineGradient.addColorStop(1, "rgba(0,80,0,0.15)");
 
-                ctx.stroke(path);
-            }
-        }
+ctx.strokeStyle = shineGradient;
 
+ctx.stroke(path);
 
-        ctx.restore();
-    }
+ctx.restore();
+
+}
 
 
     // ==========================================
