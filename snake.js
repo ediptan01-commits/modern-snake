@@ -1083,57 +1083,6 @@ if (currentArena === "orman" && forestArenaImage.complete) {
     );
 }
 
-    // IZGARA
-
-    ctx.strokeStyle =
-        "#182131";
-
-    ctx.lineWidth = 1;
-
-
-    for (
-        let x = 0;
-        x < canvas.width;
-        x += grid
-    ) {
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            x,
-            0
-        );
-
-        ctx.lineTo(
-            x,
-            canvas.height
-        );
-
-        ctx.stroke();
-    }
-
-
-    for (
-        let y = 0;
-        y < canvas.height;
-        y += grid
-    ) {
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            0,
-            y
-        );
-
-        ctx.lineTo(
-            canvas.width,
-            y
-        );
-
-        ctx.stroke();
-    }
-
     drawFood();
 
     drawCoin();
