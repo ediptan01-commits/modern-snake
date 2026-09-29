@@ -46,6 +46,24 @@ const snakeSprites = {
     }
 };
 
+// YILAN GÖRSELLERİNİ YÜKLE
+snakeSprites.head.up.src = "snake-head-up.png";
+snakeSprites.head.right.src = "snake-head-right.png";
+snakeSprites.head.down.src = "snake-head-down.png";
+snakeSprites.head.left.src = "snake-head-left.png";
+
+snakeSprites.body.src = "snake-body.png";
+
+snakeSprites.turn.tr.src = "snake-turn-tr.png";
+snakeSprites.turn.tl.src = "snake-turn-tl.png";
+snakeSprites.turn.br.src = "snake-turn-br.png";
+snakeSprites.turn.bl.src = "snake-turn-bl.png";
+
+snakeSprites.tail.up.src = "snake-tail-up.png";
+snakeSprites.tail.right.src = "snake-tail-right.png";
+snakeSprites.tail.down.src = "snake-tail-down.png";
+snakeSprites.tail.left.src = "snake-tail-left.png";
+
 const grid = 20;
 
 let snake = [];
