@@ -1141,12 +1141,22 @@ if (currentArena === "orman" && forestArenaImage.complete) {
 
 function drawSnake3D() {
 
-    if (!snake || snake.length === 0) return;
+    if (!snake || snake.length === 0) {
+        return;
+    }
+
+    // =====================================================
+    // AYARLAR
+    // =====================================================
+
+    const headSize = grid * 2.5;
+    const bodyWidth = grid * 1.25;
+    const tailSize = grid * 1.45;
 
 
-    // =================================================
-    // GÖVDE NOKTALARINI AL
-    // =================================================
+    // =====================================================
+    // GÖVDE NOKTALARI
+    // =====================================================
 
     const points = snake.map(part => ({
         x: part.x + grid / 2,
@@ -1154,9 +1164,9 @@ function drawSnake3D() {
     }));
 
 
-    // =================================================
-    // YUMUŞAK GÖVDE YOLU
-    // =================================================
+    // =====================================================
+    // GÖVDE YOLU
+    // =====================================================
 
     if (points.length >= 2) {
 
@@ -1170,18 +1180,18 @@ function drawSnake3D() {
 
         for (let i = 1; i < points.length - 1; i++) {
 
-            const p = points[i];
-            const n = points[i + 1];
+            const current = points[i];
+            const next = points[i + 1];
 
             const midX =
-                (p.x + n.x) / 2;
+                (current.x + next.x) / 2;
 
             const midY =
-                (p.y + n.y) / 2;
+                (current.y + next.y) / 2;
 
             path.quadraticCurveTo(
-                p.x,
-                p.y,
+                current.x,
+                current.y,
                 midX,
                 midY
             );
@@ -1206,69 +1216,103 @@ function drawSnake3D() {
         ctx.lineCap = "round";
         ctx.lineJoin = "round";
 
-        ctx.lineWidth = grid * 1.15;
-
 
         const bodyGradient =
             ctx.createLinearGradient(
                 0,
-                -20,
+                -bodyWidth,
                 0,
-                20
+                bodyWidth
             );
+
 
         bodyGradient.addColorStop(
             0,
-            "#b9f542"
+            "#caff62"
         );
 
         bodyGradient.addColorStop(
-            0.25,
-            "#72d51d"
+            0.18,
+            "#8ee82c"
         );
 
         bodyGradient.addColorStop(
-            0.55,
-            "#35a914"
+            0.45,
+            "#4fc51b"
         );
 
         bodyGradient.addColorStop(
-            0.8,
-            "#187b0b"
+            0.72,
+            "#208d0d"
         );
 
         bodyGradient.addColorStop(
             1,
-            "#084d08"
+            "#063f06"
         );
 
 
         ctx.strokeStyle =
             bodyGradient;
 
+        ctx.lineWidth =
+            bodyWidth;
+
         ctx.stroke(path);
 
 
         // =================================================
-        // GÖVDE PARLAKLIĞI
+        // GÖVDE PARLAK ŞERİDİ
         // =================================================
+
+        ctx.save();
 
         ctx.lineWidth =
-            grid * 0.28;
+            bodyWidth * 0.23;
 
         ctx.strokeStyle =
-            "rgba(220,255,120,0.45)";
+            "rgba(225,255,145,0.55)";
+
+        ctx.lineCap =
+            "round";
 
         ctx.stroke(path);
+
+        ctx.restore();
+
+
+        // =================================================
+        // ALT GÖLGE
+        // =================================================
+
+        ctx.save();
+
+        ctx.translate(
+            0,
+            bodyWidth * 0.18
+        );
+
+        ctx.lineWidth =
+            bodyWidth * 0.22;
+
+        ctx.strokeStyle =
+            "rgba(0,50,0,0.28)";
+
+        ctx.lineCap =
+            "round";
+
+        ctx.stroke(path);
+
+        ctx.restore();
 
 
         ctx.restore();
     }
 
 
-    // =================================================
+    // =====================================================
     // KUYRUK
-    // =================================================
+    // =====================================================
 
     if (snake.length >= 2) {
 
@@ -1294,17 +1338,20 @@ function drawSnake3D() {
             tailImage =
                 snakeSprites.tail.right;
 
-        } else if (dx < 0) {
+        }
+        else if (dx < 0) {
 
             tailImage =
                 snakeSprites.tail.left;
 
-        } else if (dy < 0) {
+        }
+        else if (dy < 0) {
 
             tailImage =
                 snakeSprites.tail.up;
 
-        } else {
+        }
+        else {
 
             tailImage =
                 snakeSprites.tail.down;
@@ -1312,41 +1359,44 @@ function drawSnake3D() {
 
 
         if (
+            tailImage &&
             tailImage.complete &&
             tailImage.naturalWidth > 0
         ) {
 
-            const size =
-                grid * 1.5;
+            const x =
+                tail.x +
+                grid / 2 -
+                tailSize / 2;
+
+            const y =
+                tail.y +
+                grid / 2 -
+                tailSize / 2;
 
 
             ctx.drawImage(
                 tailImage,
-
-                tail.x +
-                    grid / 2 -
-                    size / 2,
-
-                tail.y +
-                    grid / 2 -
-                    size / 2,
-
-                size,
-                size
+                x,
+                y,
+                tailSize,
+                tailSize
             );
         }
     }
 
 
-    // =================================================
+    // =====================================================
     // KAFA
-    // =================================================
+    // =====================================================
 
     const head =
         snake[0];
 
 
-    if (!head) return;
+    if (!head) {
+        return;
+    }
 
 
     let headImage;
@@ -1357,17 +1407,20 @@ function drawSnake3D() {
         headImage =
             snakeSprites.head.right;
 
-    } else if (direction.x < 0) {
+    }
+    else if (direction.x < 0) {
 
         headImage =
             snakeSprites.head.left;
 
-    } else if (direction.y < 0) {
+    }
+    else if (direction.y < 0) {
 
         headImage =
             snakeSprites.head.up;
 
-    } else {
+    }
+    else {
 
         headImage =
             snakeSprites.head.down;
@@ -1375,28 +1428,45 @@ function drawSnake3D() {
 
 
     if (
+        headImage &&
         headImage.complete &&
         headImage.naturalWidth > 0
     ) {
 
-        const headSize =
-            grid * 2.5;
+        const x =
+            head.x +
+            grid / 2 -
+            headSize / 2;
+
+        const y =
+            head.y +
+            grid / 2 -
+            headSize / 2;
+
+
+        // Hafif gölge
+        ctx.save();
+
+        ctx.shadowColor =
+            "rgba(0,0,0,0.45)";
+
+        ctx.shadowBlur =
+            5;
+
+        ctx.shadowOffsetY =
+            2;
 
 
         ctx.drawImage(
             headImage,
-
-            head.x +
-                grid / 2 -
-                headSize / 2,
-
-            head.y +
-                grid / 2 -
-                headSize / 2,
-
+            x,
+            y,
             headSize,
             headSize
         );
+
+
+        ctx.restore();
     }
 }
 
